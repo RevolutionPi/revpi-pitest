@@ -2,12 +2,14 @@ ifeq ($(CC),)
 	CC = gcc
 endif
 
+PICONTROL = lib/piControl
+
 IDIR =.
-CFLAGS += -I. -I.. -std=c11
+CFLAGS += -I. -I$(PICONTROL) -std=c11
 
 ODIR = obj
 
-_DEPS = ../piControl.h piControlIf.h
+_DEPS = $(PICONTROL)/piControl.h piControlIf.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = piTest.o piControlIf.o
