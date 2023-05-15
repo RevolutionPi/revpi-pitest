@@ -1,0 +1,22 @@
+Source: pitest
+Section: electronics
+Priority: optional
+Maintainer: KUNBUS GmbH <support@kunbus.com>
+Rules-Requires-Root: no
+Homepage: https://revolutionpi.com/
+Vcs-Browser: https://github.com/RevolutionPi/revpi-pitest
+Vcs-Git: https://github.com/RevolutionPi/revpi-pitest.git -b raspios/bullseye
+Build-Depends:
+  cmake,
+  debhelper-compat (= 13)
+Standards-Version: 4.5.1
+
+Package: pitest
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Revolution Pi command line utility
+ Interact with the in-kernel piControl process to list I/O devices and
+ gateway devices attached to a RevPi device, read and write values in the
+ process image and reset the piControl process.  Comes with full source
+ code.  Revolution Pi is a set of IoT products based on the Raspberry Pi
+ and geared towards industrial usage.
