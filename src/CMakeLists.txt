@@ -13,7 +13,7 @@ install(TARGETS ${TARGET} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 # then moving it to the install directory.
 # this needs to be done this way because the alternative way of doing
 # `install(CODE...` doesn't respect the installation prefix.
-ADD_CUSTOM_TARGET(piControlReset ALL
-	COMMAND ln -s ${TARGET} ${PROJECT_BINARY_DIR}/piControlReset)
+add_custom_target(piControlReset ALL
+	COMMAND ln -fs ${TARGET} ${PROJECT_BINARY_DIR}/piControlReset)
 install(FILES ${PROJECT_BINARY_DIR}/piControlReset
 	DESTINATION ${CMAKE_INSTALL_BINDIR})
