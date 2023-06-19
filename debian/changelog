@@ -1,3 +1,11 @@
+pitest (1.4.1-1+revpi11+1) bullseye; urgency=medium
+
+  * docs: Correct source code url
+  * docs: Correct RevolutionPi website
+  * chore: Update piControl submodule to latest hash
+
+ -- Thomas Böhler <t.boehler@kunbus.com>  Mon, 19 Jun 2023 09:15:01 +0200
+
 pitest (1.4.0-1+revpi11+1) bullseye; urgency=medium
 
   * Add MIT license in LICENSE.txt
