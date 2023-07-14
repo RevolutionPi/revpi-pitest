@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 KUNBUS GmbH
+#
+# SPDX-License-Identifier: MIT
+
 set(TARGET piTest)
 set(SOURCES
 	piTest.c

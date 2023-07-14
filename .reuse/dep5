@@ -1,0 +1,10 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Source: https://github.com/RevolutionPi/revpi-pitest
+
+Files: doc/piTest.1
+Copyright: 2017-2023 KUNBUS GmbH
+License: MIT
+
+Files: .gitmodules
+Copyright: 2023 KUNBUS GmbH
+License: MIT
