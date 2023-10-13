@@ -4,12 +4,12 @@ Priority: optional
 Maintainer: KUNBUS GmbH <support@kunbus.com>
 Rules-Requires-Root: no
 Homepage: https://revolutionpi.com/
-Vcs-Browser: https://github.com/RevolutionPi/revpi-pitest
-Vcs-Git: https://github.com/RevolutionPi/revpi-pitest.git -b raspios/bullseye
+Vcs-Browser: https://gitlab.com/revolutionpi/revpi-pitest
+Vcs-Git: https://gitlab.com/revolutionpi/revpi-pitest.git -b raspios/bookworm
 Build-Depends:
   cmake,
   debhelper-compat (= 13)
-Standards-Version: 4.5.1
+Standards-Version: 4.6.2
 
 Package: pitest
 Architecture: any
