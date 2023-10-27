@@ -388,6 +388,33 @@ int piControlResetCounter(int address, int bitfield)
         return ret;
 }
 
+int piControlGetROCounters(int address)
+{
+	struct revpi_ro_ioctl_counters ioc;
+	int ret;
+	int i;
+
+        piControlOpen();
+
+        if (PiControlHandle_g < 0)
+                return -ENODEV;
+
+        ioc.addr = address;
+
+        ret = ioctl(PiControlHandle_g, KB_RO_GET_COUNTER, &ioc);
+        if (ret < 0) {
+                perror("Failed to get RO counters");
+		return ret;
+        }
+
+	printf("RO relay counters:\n");
+	for (i = 0; i < REVPI_RO_NUM_RELAYS; i++)
+		printf("     Relay %i: %u\n", i + 1, ioc.counter[i]);
+
+        return ret;
+}
+
+
 /***********************************************************************************/
 /*!
  * @brief Update firmware

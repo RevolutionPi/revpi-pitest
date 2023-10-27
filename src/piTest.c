@@ -753,6 +753,9 @@ void printHelp(char *programname)
 	printf("                     E.g.: -R 32,0x0014:\n");
 	printf("                     Reset the counters on input pin I_3 and I_5.\n");
 	printf("\n");
+	printf("          -C <addr>: Retrieve RO relay counters\n");
+	printf("                     <addr> is the address of module as displayed with option -d.\n");
+	printf("\n");
 	printf("                 -S: Stop/Restart I/O update.\n");
 	printf("\n");
 	printf("                 -x: Reset piControl process.\n");
@@ -812,7 +815,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 	// Scan argument
-	while ((c = getopt(argc, argv, "dv:1qr:w:s:R:c:g:xlfS")) != -1) {
+	while ((c = getopt(argc, argv, "dv:1qr:w:s:R:C:c:g:xlfS")) != -1) {
 		switch (c) {
 		case 'd':
 			showDeviceList();
@@ -906,6 +909,16 @@ int main(int argc, char *argv[])
 			}
 			piControlResetCounter(address, val);
 			break;
+		case 'C':	// get RO counters
+			rc = sscanf(optarg, "%d", &address);
+			if (rc != 1) {
+				printf("Wrong arguments for retrieving RO counters\n");
+				printf("Try '-C address'\n");
+				return 0;
+			}
+			piControlGetROCounters(address);
+			break;
+
 		case 'c':
 		{
 			unsigned int addr, channl, mode, x_val, y_val;
