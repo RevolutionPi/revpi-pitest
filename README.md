@@ -105,6 +105,9 @@ Options:
                      E.g.: -R 32,0x0014:
                      Reset the counters on input pin I_3 and I_5.
 
+          -C <addr>: Retrieve RO relay counters
+                     <addr> is the address of the module as displayed with option -d.
+
                  -S: Stop/Restart I/O update.
 
                  -x: Reset piControl process.
