@@ -1,28 +1,10 @@
+// SPDX-FileCopyrightText: 2016-2023 KUNBUS GmbH
+//
+// SPDX-License-Identifier: MIT
+
 /*!
- * SPDX-License-Identifier: MIT
- *
  * Project: piTest
  * Demo source code for usage of piControl driver
- *
- * Copyright (C) 2017 : KUNBUS GmbH, Heerweg 15C, 73370 Denkendorf, Germany
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
  *
  * \file piTest.c
  *
@@ -152,6 +134,8 @@ char *getModuleName(uint16_t moduletype)
 		return "RevPi Flat";
 	case 136:
 		return "RevPi Connect 4";
+	case 137:
+		return "RevPi RO";
 
 	case PICONTROL_SW_MODBUS_TCP_SLAVE:
 		return "ModbusTCP Slave Adapter";
@@ -769,6 +753,9 @@ void printHelp(char *programname)
 	printf("                     E.g.: -R 32,0x0014:\n");
 	printf("                     Reset the counters on input pin I_3 and I_5.\n");
 	printf("\n");
+	printf("          -C <addr>: Retrieve RO relay counters\n");
+	printf("                     <addr> is the address of module as displayed with option -d.\n");
+	printf("\n");
 	printf("                 -S: Stop/Restart I/O update.\n");
 	printf("\n");
 	printf("                 -x: Reset piControl process.\n");
@@ -828,7 +815,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 	// Scan argument
-	while ((c = getopt(argc, argv, "dv:1qr:w:s:R:c:g:xlfS")) != -1) {
+	while ((c = getopt(argc, argv, "dv:1qr:w:s:R:C:c:g:xlfS")) != -1) {
 		switch (c) {
 		case 'd':
 			showDeviceList();
@@ -922,6 +909,16 @@ int main(int argc, char *argv[])
 			}
 			piControlResetCounter(address, val);
 			break;
+		case 'C':	// get RO counters
+			rc = sscanf(optarg, "%d", &address);
+			if (rc != 1) {
+				printf("Wrong arguments for retrieving RO counters\n");
+				printf("Try '-C address'\n");
+				return 0;
+			}
+			piControlGetROCounters(address);
+			break;
+
 		case 'c':
 		{
 			unsigned int addr, channl, mode, x_val, y_val;

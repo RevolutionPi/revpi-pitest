@@ -1,6 +1,4 @@
 .\"                                      Hey, EMACS: -*- nroff -*-
-.\" (C) Copyright 2016-2018 Kunbus GmbH
-.\"
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
@@ -87,6 +85,13 @@ defining the counters/endcoders to reset.
 .br
 E.g. \fI-R 32,0x14\fP resets the counters on the inputs I2 and I5 because the bits 2 and 5 are set to 1.
 The DIO must be the first module on the right of the RevPi.
+.TP
+.B \-C \fIaddress\fP
+Retrieves the relay wear level counters of a RO module. \fIaddress\fP is the
+address of a RO module as displayed in the device list (option -d).
+.br
+E.g. \fI-C 32\fP retrieves the counters from a module with address 32. In this
+case the RO module must be the first module on the right of the RevPi.
 .TP
 .B \-f
 Starts the firmware update process.

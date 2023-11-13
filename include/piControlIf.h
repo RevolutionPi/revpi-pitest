@@ -65,6 +65,7 @@ int piControlSetBitValue(SPIValue *pSpiValue);
 int piControlGetVariableInfo(SPIVariable *pSpiVariable);
 int piControlFindVariable(const char *name);
 int piControlResetCounter(int address, int bitfield);
+int piControlGetROCounters(int address);
 int piControlWaitForEvent(void);
 int piControlUpdateFirmware(uint32_t addr_p);
 int piControlStopIO(int stop);
