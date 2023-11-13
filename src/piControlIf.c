@@ -1,34 +1,14 @@
+// SPDX-FileCopyrightText: 2017-2023 KUNBUS GmbH
+//
+// SPDX-License-Identifier: MIT
+
 /*!
- * SPDX-License-Identifier: MIT
- *
  * Project: Pi Control
  * Demo source code for usage of piControl driver
- *
- * Copyright (C) 2017 : KUNBUS GmbH, Heerweg 15C, 73370 Denkendorf, Germany
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
  *
  * \file piControlIf.c
  *
  * \brief PI Control Interface
- *
- *
  */
 
 /******************************************************************************/
@@ -407,6 +387,33 @@ int piControlResetCounter(int address, int bitfield)
         }
         return ret;
 }
+
+int piControlGetROCounters(int address)
+{
+	struct revpi_ro_ioctl_counters ioc;
+	int ret;
+	int i;
+
+        piControlOpen();
+
+        if (PiControlHandle_g < 0)
+                return -ENODEV;
+
+        ioc.addr = address;
+
+        ret = ioctl(PiControlHandle_g, KB_RO_GET_COUNTER, &ioc);
+        if (ret < 0) {
+                perror("Failed to get RO counters");
+		return ret;
+        }
+
+	printf("RO relay counters:\n");
+	for (i = 0; i < REVPI_RO_NUM_RELAYS; i++)
+		printf("     Relay %i: %u\n", i + 1, ioc.counter[i]);
+
+        return ret;
+}
+
 
 /***********************************************************************************/
 /*!
