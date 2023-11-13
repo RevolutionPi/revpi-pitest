@@ -1,3 +1,30 @@
+pitest (1.5.0-1+revpi11+1) bullseye; urgency=medium
+
+  [ Thomas Böhler ]
+  * chore: Make repository REUSE compliant
+
+  [ Nicolai Buchwitz ]
+  * ci: Add pipeline for package build
+
+  [ Thomas Böhler ]
+  * chore: Add move to GitLab to README
+
+  [ Nicolai Buchwitz ]
+  * feat: Add support for RevPi RO
+
+  [ Thomas Böhler ]
+  * doc: Add build instructions to README.md
+  * refactor: Use piControl GitLab link in submodule
+
+  [ Lino Sanfilippo ]
+  * Add new command line parameter to retrieve RO counters
+
+  [ Nicolai Buchwitz ]
+  * doc(RO): Explain RO counter usage
+  * chore: Update piControl submodule to latest hash
+
+ -- Thomas Böhler <t.boehler@kunbus.com>  Mon, 13 Nov 2023 15:07:08 +0100
+
 pitest (1.4.1-1+revpi11+1) bullseye; urgency=medium
 
   * docs: Correct source code url
