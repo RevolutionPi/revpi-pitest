@@ -25,6 +25,12 @@
 #include "piControlIf.h"
 #include "piControl.h"
 
+/* long option names */
+# define MODULE_LONG_ARG_NAME "module"
+
+/* long option indices */
+# define MODULE_LONG_ARG_INDEX 0
+
 /***********************************************************************************/
 /*!
  * @brief Get message text for read error
@@ -762,7 +768,14 @@ void printHelp(char *programname)
 	printf("\n");
 	printf("                 -l: Wait for reset of piControl process.\n");
 	printf("\n");
-	printf("                 -f: Update firmware. (see tutorials on website for more info) \n");
+	printf("                 -f: Update firmware. (see tutorials on website for more info)\n");
+	printf("                     The option \"--module <addr>\" can be given before this one to specify the address of the module to update.\n");
+	printf("                     If the \"--module <addr>\" is not given before it a module to update will be selected automatially.\n");
+	printf("\n");
+	printf("    --module <addr>: <addr> specifies the address of the module to use for another option.\n");
+	printf("                     This options can be used with the \"-f\" flag to specify a specific module to update.\n");
+	printf("                     In order for the \"-f\" flag to recognize the address, this option has to be given directly before it.\n");
+	printf("                     E.g.: --module 31 -f\n");
 	printf("\n");
 	printf("  -c <addr>,<c>,<m>,<x>,<y>: Do the calibration. (see tutorials on website for more info)\n");
 	printf("                     <addr> is the address of module as displayed with option -d.\n");
@@ -792,6 +805,10 @@ int main(int argc, char *argv[])
 	bool cyclic = true;	// default is cyclic output
 	bool quiet = false;	// default is verbose output
 	unsigned long value;
+	// Used for the `-f` option. If `--module <arg>` is not given *before* the
+	// `-f` option the default value of `0` is used, which will automatically
+	// choose which module to update.
+	unsigned int module_address = 0;
 	char szVariableName[256];
 	char *pszTok, *progname;
 
@@ -814,9 +831,36 @@ int main(int argc, char *argv[])
 		printHelp(progname);
 		return 0;
 	}
+
+	struct option long_options[] = {
+		[MODULE_LONG_ARG_INDEX] = { MODULE_LONG_ARG_NAME, required_argument, 0, 0 }
+	};
+	int option_index = 0;
+
 	// Scan argument
-	while ((c = getopt(argc, argv, "dv:1qr:w:s:R:C:c:g:xlfS")) != -1) {
+	while ((c = getopt_long(argc, argv, "dv:1qr:w:s:R:C:c:g:xlfS",
+				long_options, &option_index)) != -1) {
 		switch (c) {
+		case 0:
+			/* long option specified */
+			switch (option_index) {
+				case MODULE_LONG_ARG_INDEX:
+					char *endptr = NULL;
+					module_address = strtoul(optarg, &endptr, 10);
+					if (endptr == optarg) {
+						fprintf(stderr, "Invalid argument '%s' to option '%s'\n", optarg,
+							long_options[option_index].name);
+						exit(1);
+					}
+					break;
+
+				default:
+					fprintf(stderr, "Invalid long option index %d\n", option_index);
+					exit(1);
+					break;
+			}
+			break;
+
 		case 'd':
 			showDeviceList();
 			break;
@@ -972,7 +1016,7 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'f':
-			rc = piControlUpdateFirmware(0);
+			rc = piControlUpdateFirmware(module_address);
 			if (rc) {
 				printf("piControlUpdateFirmware returned: %d (%s)\n", rc, strerror(-rc));
 				return rc;
