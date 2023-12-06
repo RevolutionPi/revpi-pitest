@@ -770,7 +770,7 @@ void printHelp(char *programname)
 	printf("\n");
 	printf("                 -f: Update firmware. (see tutorials on website for more info)\n");
 	printf("                     The option \"--module <addr>\" can be given before this one to specify the address of the module to update.\n");
-	printf("                     If the \"--module <addr>\" is not given before it a module to update will be selected automatially.\n");
+	printf("                     If the \"--module <addr>\" is not given before it a module to update will be selected automatically.\n");
 	printf("\n");
 	printf("    --module <addr>: <addr> specifies the address of the module to use for another option.\n");
 	printf("                     This options can be used with the \"-f\" flag to specify a specific module to update.\n");
