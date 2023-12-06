@@ -845,6 +845,7 @@ int main(int argc, char *argv[])
 			/* long option specified */
 			switch (option_index) {
 				case MODULE_LONG_ARG_INDEX:
+				{
 					char *endptr = NULL;
 					module_address = strtoul(optarg, &endptr, 10);
 					if (endptr == optarg) {
@@ -853,6 +854,7 @@ int main(int argc, char *argv[])
 						exit(1);
 					}
 					break;
+				}
 
 				default:
 					fprintf(stderr, "Invalid long option index %d\n", option_index);
