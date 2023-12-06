@@ -833,7 +833,8 @@ int main(int argc, char *argv[])
 	}
 
 	struct option long_options[] = {
-		[MODULE_LONG_ARG_INDEX] = { MODULE_LONG_ARG_NAME, required_argument, 0, 0 }
+		[MODULE_LONG_ARG_INDEX] = { MODULE_LONG_ARG_NAME, required_argument, NULL, 0 },
+		{}
 	};
 	int option_index = 0;
 
