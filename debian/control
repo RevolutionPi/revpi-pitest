@@ -5,7 +5,7 @@ Maintainer: KUNBUS GmbH <support@kunbus.com>
 Rules-Requires-Root: no
 Homepage: https://revolutionpi.com/
 Vcs-Browser: https://gitlab.com/revolutionpi/revpi-pitest
-Vcs-Git: https://gitlab.com/revolutionpi/revpi-pitest.git -b raspios/bookworm
+Vcs-Git: https://gitlab.com/revolutionpi/revpi-pitest.git -b debian/bookworm
 Build-Depends:
   cmake,
   debhelper-compat (= 13)
