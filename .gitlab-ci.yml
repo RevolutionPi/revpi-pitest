@@ -3,9 +3,9 @@ include:
   - project: "revolutionpi/infrastructure/ci-templates"
     file: "base.yml"
   - project: "revolutionpi/infrastructure/ci-templates"
-    file: "/package-build-raspios-snapshot.yml"
+    file: "/package-snapshot-debian.yml"
   - local: debian/gitlab-ci.yml
     rules:
-      - if: $CI_COMMIT_BRANCH =~ /^raspios\/.*/
+      - if: $CI_COMMIT_BRANCH =~ /^(raspios|debian)\/.*/
       - exists:
           - debian/gitlab-ci.yml
