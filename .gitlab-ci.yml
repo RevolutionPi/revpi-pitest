@@ -11,5 +11,5 @@ include:
   - local: debian/gitlab-ci.yml
     rules:
       - if: $CI_COMMIT_BRANCH =~ /^(raspios|debian)\/.*/
-      - exists:
+        exists:
           - debian/gitlab-ci.yml
