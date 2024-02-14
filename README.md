@@ -106,7 +106,7 @@ Options:
                      Reset the counters on input pin I_3 and I_5.
 
           -C <addr>: Retrieve RO relay counters
-                     <addr> is the address of the module as displayed with option -d.
+                     <addr> is the address of module as displayed with option -d.
 
                  -S: Stop/Restart I/O update.
 
@@ -114,7 +114,14 @@ Options:
 
                  -l: Wait for reset of piControl process.
 
-                 -f: Update firmware. (see tutorials on website for more info) 
+                 -f: Update firmware. (see tutorials on website for more info)
+                     The option "--module <addr>" can be given before this one to specify the address of the module to update.
+                     If the "--module <addr>" is not given before it a module to update will be selected automatically.
+
+    --module <addr>: <addr> specifies the address of the module to use for another option.
+                     This options can be used with the "-f" flag to specify a specific module to update.
+                     In order for the "-f" flag to recognize the address, this option has to be given directly before it.
+                     E.g.: --module 31 -f
 
   -c <addr>,<c>,<m>,<x>,<y>: Do the calibration. (see tutorials on website for more info)
                      <addr> is the address of module as displayed with option -d.
@@ -122,4 +129,5 @@ Options:
                      <m> is the mode
                      <x> is the check point on x axix
                      <y> is the check point on y axis
+
 ```
