@@ -1,3 +1,23 @@
+pitest (1.6.0-1+revpi11+1) bullseye; urgency=medium
+
+  [ Thomas Böhler ]
+  * feat: Add flag to give address of specific module
+  * Fix failing compilation for gcc < 12.2.0
+  * Fix spelling mistake in help output for `--module`
+  * Ensure list  of `struct option` ends with zeros
+
+  [ Nicolai Buchwitz ]
+  * fix: Run local pipelines on debian/* branches
+  * chore: Add MIT to ci files
+  * ci: Run local pipeline only if file exists
+  * doc: Update usage in README
+
+  [ Thomas Böhler ]
+  * doc: Update source code location
+  * ci: Lint REUSE in ci
+
+ -- Thomas Böhler <t.boehler@kunbus.com>  Fri, 01 Mar 2024 09:41:25 +0100
+
 pitest (1.5.0-1+revpi11+1) bullseye; urgency=medium
 
   [ Thomas Böhler ]
