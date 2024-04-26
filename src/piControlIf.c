@@ -427,13 +427,17 @@ int piControlGetROCounters(int address)
  * The module must be on the right side of the RevPi Core and on the left side of the RevPi Connect.
  * This ioctl reads the version number from the module and compares it to the lastet available
  * firmware file. If a new firmware is available, it is flashed to the module.
+ * If forced update is specified the firmware is flashed even if its version number is equal to or
+ * smaller than the one running on the target module. This requires a module address.
  *
- * @param[in]   addr of module to update. 0 for automatic selction of the module to update.
+ * @param[in]   addr_p		address of module to update. 0 for automatic selection of the module
+ * 				to update.
+ * @param[in]   force_update	skip the firmware version check.
  *
  * @return 0 or error if negative
  *
  ************************************************************************************/
-int piControlUpdateFirmware(uint32_t addr_p)
+int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 {
 	struct picontrol_firmware_upload fwu;
         int ret;
@@ -445,6 +449,14 @@ int piControlUpdateFirmware(uint32_t addr_p)
 
 	memset(&fwu, 0, sizeof(fwu));
 	fwu.addr = addr_p;
+	if (force_update) {
+		if (!fwu.addr) {
+			fprintf(stderr,
+				"Error: no module address given for forced firmware update.\n");
+			return -EINVAL;
+		}
+		fwu.flags |= PICONTROL_FIRMWARE_FORCE_UPLOAD;
+	}
 
 	ret = ioctl(PiControlHandle_g, PICONTROL_UPLOAD_FIRMWARE, &fwu);
 

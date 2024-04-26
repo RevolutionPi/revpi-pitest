@@ -27,9 +27,11 @@
 
 /* long option names */
 # define MODULE_LONG_ARG_NAME "module"
+# define FORCE_LONG_ARG_NAME "force"
 
 /* long option indices */
 # define MODULE_LONG_ARG_INDEX 0
+# define FORCE_LONG_ARG_INDEX  1
 
 /***********************************************************************************/
 /*!
@@ -773,11 +775,19 @@ void printHelp(char *programname)
 	printf("                 -f: Update firmware. (see tutorials on website for more info)\n");
 	printf("                     The option \"--module <addr>\" can be given before this one to specify the address of the module to update.\n");
 	printf("                     If the \"--module <addr>\" is not given before it a module to update will be selected automatically.\n");
+	printf("                     The option \"--force \" can be given before this one to ignore the firmware version check.\n");
 	printf("\n");
 	printf("    --module <addr>: <addr> specifies the address of the module to use for another option.\n");
 	printf("                     This options can be used with the \"-f\" flag to specify a specific module to update.\n");
 	printf("                     In order for the \"-f\" flag to recognize the address, this option has to be given directly before it.\n");
 	printf("                     E.g.: --module 31 -f\n");
+	printf("                     It can be combined with the \"--force\" option.\n");
+	printf("\n");
+	printf("            --force: Enforce the firmware update.\n");
+	printf("                     This options can be used with the \"-f\" flag to force a firmware update.\n");
+	printf("                     In order for the \"-f\" flag to recognize it, this option has to be given before it.\n");
+	printf("                     E.g.: --force -f\n");
+	printf("                     It can be combined with the \"--module\" option.\n");
 	printf("\n");
 	printf("  -c <addr>,<c>,<m>,<x>,<y>: Do the calibration. (see tutorials on website for more info)\n");
 	printf("                     <addr> is the address of module as displayed with option -d.\n");
@@ -813,6 +823,7 @@ int main(int argc, char *argv[])
 	unsigned int module_address = 0;
 	char szVariableName[256];
 	char *pszTok, *progname;
+	int force_update = 0;
 
 	progname = strrchr(argv[0], '/');
 	if (!progname) {
@@ -836,6 +847,7 @@ int main(int argc, char *argv[])
 
 	struct option long_options[] = {
 		[MODULE_LONG_ARG_INDEX] = { MODULE_LONG_ARG_NAME, required_argument, NULL, 0 },
+		[FORCE_LONG_ARG_INDEX] = { FORCE_LONG_ARG_NAME, no_argument, &force_update, 1 },
 		{}
 	};
 	int option_index = 0;
@@ -858,6 +870,9 @@ int main(int argc, char *argv[])
 					}
 					break;
 				}
+
+				case FORCE_LONG_ARG_INDEX:
+					break;
 
 				default:
 					fprintf(stderr, "Invalid long option index %d\n", option_index);
@@ -1021,7 +1036,7 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'f':
-			rc = piControlUpdateFirmware(module_address);
+			rc = piControlUpdateFirmware(module_address, force_update);
 			if (rc) {
 				printf("piControlUpdateFirmware returned: %d (%s)\n", rc, strerror(-rc));
 				return rc;
