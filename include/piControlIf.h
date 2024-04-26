@@ -38,6 +38,7 @@
 /******************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <piControl.h>
 
 
@@ -67,7 +68,7 @@ int piControlFindVariable(const char *name);
 int piControlResetCounter(int address, int bitfield);
 int piControlGetROCounters(int address);
 int piControlWaitForEvent(void);
-int piControlUpdateFirmware(uint32_t addr_p);
+int piControlUpdateFirmware(uint32_t addr_p, bool force_update);
 int piControlStopIO(int stop);
 void piShowLastMessage(void);
 #ifdef KUNBUS_TEST
