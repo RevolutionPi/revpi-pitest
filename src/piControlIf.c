@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2017-2023 KUNBUS GmbH
+// SPDX-FileCopyrightText: 2017-2024 KUNBUS GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -435,6 +435,7 @@ int piControlGetROCounters(int address)
  ************************************************************************************/
 int piControlUpdateFirmware(uint32_t addr_p)
 {
+	struct picontrol_firmware_upload fwu;
         int ret;
 
         piControlOpen();
@@ -442,10 +443,10 @@ int piControlUpdateFirmware(uint32_t addr_p)
         if (PiControlHandle_g < 0)
                 return -ENODEV;
 
-        if (addr_p == 0)
-                ret = ioctl(PiControlHandle_g, KB_UPDATE_DEVICE_FIRMWARE, NULL);
-        else
-                ret = ioctl(PiControlHandle_g, KB_UPDATE_DEVICE_FIRMWARE, &addr_p);
+	memset(&fwu, 0, sizeof(fwu));
+	fwu.addr = addr_p;
+
+	ret = ioctl(PiControlHandle_g, PICONTROL_UPLOAD_FIRMWARE, &fwu);
 
         piShowLastMessage();
         
