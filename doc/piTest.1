@@ -103,6 +103,14 @@ If
 .B \-\-module
 is not given before it, a module to update will be selected automatically and
 only one module should be connected.
+.br
+The option
+.B \-\-force
+can be given before this one to omit the firmware version check.
+If
+.B \-\-force
+is not given before it, a module is only updated if the version of the firmware
+running on the module is smaller than the one used for the update.
 .TP
 .B \-\-module \fIaddress\fP
 Specify the module that the following flag should use with the \fIaddress\fP.
@@ -110,6 +118,15 @@ Specify the module that the following flag should use with the \fIaddress\fP.
 This option can be used with the
 .B \-f
 flag to specify a specific module to update.
+.TP
+.B \-\-force
+Force a module update even if the firmware version is equal to or smaller than the version of the firmware running on the target module.
+.br
+This option can be used with the
+.B \-f
+flag and requires the address of the target module (option
+.B \-\-module
+).
 .TP
 .B \-l
 Listen for events such as a piControl reset initiated by another process.
