@@ -6,7 +6,20 @@ piTest - interact with in-kernel piControl process
 
 # SYNOPSIS
 
-*piTest* [_options_]
+*piTest* *-d*++
+*piTest* *-v* _variablename_++
+*piTest* [*-1q*] *-r* _variablename_[,_f_]++
+*piTest* [*-1q*] *-r* _o_,_l_[,_f_]++
+*piTest* *-w* _variablename_,_v_++
+*piTest* *-w* _o_,_l_,_v_++
+*piTest* *-g* _o_,_b_++
+*piTest* *-s* _o_,_b_,(*0*|*1*)++
+*piTest* *-R* _a_,_b_++
+*piTest* *-C* _address_++
+*piTest* [*--module* _address_] *-f*++
+*piTest* *-l*++
+*piTest* *-S*++
+*piTest* *-x*
 
 # DESCRIPTION
 
