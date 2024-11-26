@@ -133,6 +133,10 @@ flag and requires the address of the target module (option
 .TP
 .B \-l
 Listen for events such as a piControl reset initiated by another process.
+.br
+With this flag the exit status of piTest no longer states whether the command
+failed or not but corresponds to an event that was caught. The exit codes are
+documented in \fBEXIT STATUS\fR.
 .TP
 .B \-S
 Stop cyclic synchronization of the process image with attached I/O and
@@ -146,6 +150,15 @@ Reset control process.
 .TP
 .B \-h
 Show summary of options.
+.SH EXIT STATUS
+piTest exits with an exit status 1 if an error occurred.
+
+If the \fB-l\fR flag is given exit codes have the following meaning:
+.RS 4
+.IP \[bu]
+1: Reset
+.RE
+
 .SH SEE ALSO
 The source code of this program is available at
 .IR https://gitlab.com/revolutionpi/revpi-pitest
