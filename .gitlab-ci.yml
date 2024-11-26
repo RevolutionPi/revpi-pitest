@@ -2,12 +2,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-# Build a snapshot debian package from current master
 include:
   - project: "revolutionpi/infrastructure/ci-templates"
     file: "base.yml"
   - project: "revolutionpi/infrastructure/ci-templates"
-    file: "/package-snapshot-debian.yml"
+    file: "/package-devel.yml"
   - project: "revolutionpi/infrastructure/ci-templates"
     file: "/reuse-lint.yml"
   - local: debian/gitlab-ci.yml
