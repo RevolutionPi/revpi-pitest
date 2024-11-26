@@ -22,8 +22,10 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "piControlIf.h"
 
@@ -92,8 +94,10 @@ int piControlReset(void)
 	if (ret < 0)
 		return ret;
 
-	if (ioctl(PiControlHandle_g, KB_RESET, NULL) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_RESET, NULL) < 0) {
+		fprintf(stderr, "Failed to reset piControl: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -114,8 +118,10 @@ int piControlWaitForEvent(void)
 	if (ret < 0)
 		return ret;
 
-	if (ioctl(PiControlHandle_g, KB_WAIT_FOR_EVENT, &event) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_WAIT_FOR_EVENT, &event) < 0) {
+		fprintf(stderr, "Failed to wait for event: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return event;
 }
@@ -143,12 +149,22 @@ int piControlRead(uint32_t Offset, uint32_t Length, uint8_t * pData)
 		return ret;
 
 	/* seek */
-	if (lseek(PiControlHandle_g, Offset, SEEK_SET) < 0)
-		return -errno;
+	if (lseek(PiControlHandle_g, Offset, SEEK_SET) < 0) {
+		fprintf(stderr,
+			"Failed to seek to data at offset %" PRIu32 ": %s\n",
+			Offset, strerror(errno));
+		return -1;
+	}
+
 	/* read */
 	BytesRead = read(PiControlHandle_g, pData, Length);
-	if (BytesRead < 0)
-		return -errno;
+	if (BytesRead < 0) {
+		fprintf(stderr,
+			"Failed to read data at offset %" PRIu32
+			" with length %" PRIu32 ": %s\n",
+			Offset, Length, strerror(errno));
+		return -1;
+	}
 
 	return BytesRead;
 }
@@ -176,13 +192,22 @@ int piControlWrite(uint32_t Offset, uint32_t Length, uint8_t * pData)
 		return ret;
 
 	/* seek */
-	if (lseek(PiControlHandle_g, Offset, SEEK_SET) < 0)
-		return -errno;
+	if (lseek(PiControlHandle_g, Offset, SEEK_SET) < 0) {
+		fprintf(stderr,
+			"Failed to seek to data at offset %" PRIu32 ": %s\n",
+			Offset, strerror(errno));
+		return -1;
+	}
 
-        /* Write */
+	/* Write */
 	BytesWritten = write(PiControlHandle_g, pData, Length);
-	if (BytesWritten < 0)
-		return -errno;
+	if (BytesWritten < 0) {
+		fprintf(stderr,
+			"Failed to write data at offset %" PRIu32
+			" with length %" PRIu32 ": %s\n",
+			Offset, Length, strerror(errno));
+		return -1;
+	}
 
 	return BytesWritten;
 }
@@ -206,8 +231,10 @@ int piControlGetDeviceInfo(SDeviceInfo * pDev)
 	if (ret < 0)
 		return ret;
 
-	if (ioctl(PiControlHandle_g, KB_GET_DEVICE_INFO, pDev) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_GET_DEVICE_INFO, pDev) < 0) {
+		fprintf(stderr, "Failed to get device info: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -232,12 +259,11 @@ int piControlGetDeviceInfoList(SDeviceInfo * pDev)
 	if (ret < 0)
 		return ret;
 
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
-
 	cnt = ioctl(PiControlHandle_g, KB_GET_DEVICE_INFO_LIST, pDev);
-	if (cnt < 0)
-		return -errno;
+	if (cnt < 0) {
+		fprintf(stderr, "Failed to get device info list: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return cnt;
 }
@@ -264,8 +290,10 @@ int piControlGetBitValue(SPIValue * pSpiValue)
 	pSpiValue->i16uAddress += pSpiValue->i8uBit / 8;
 	pSpiValue->i8uBit %= 8;
 
-	if (ioctl(PiControlHandle_g, KB_GET_VALUE, pSpiValue) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_GET_VALUE, pSpiValue) < 0) {
+		fprintf(stderr, "Failed to get bit value: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -292,8 +320,10 @@ int piControlSetBitValue(SPIValue * pSpiValue)
 	pSpiValue->i16uAddress += pSpiValue->i8uBit / 8;
 	pSpiValue->i8uBit %= 8;
 
-	if (ioctl(PiControlHandle_g, KB_SET_VALUE, pSpiValue) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_SET_VALUE, pSpiValue) < 0) {
+		fprintf(stderr, "Failed to set bit value: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -317,8 +347,10 @@ int piControlGetVariableInfo(SPIVariable * pSpiVariable)
 	if (ret < 0)
 		return ret;
 
-	if (ioctl(PiControlHandle_g, KB_FIND_VARIABLE, pSpiVariable) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_FIND_VARIABLE, pSpiVariable) < 0) {
+		fprintf(stderr, "Failed to get variable info: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -349,7 +381,8 @@ int piControlFindVariable(const char *name)
 
 	ret = ioctl(PiControlHandle_g, KB_FIND_VARIABLE, &var);
 	if (ret < 0) {
-                //printf("could not find variable '%s' in configuration.\n", var.strVarName);
+		//printf("could not find variable '%s' in configuration.\n", var.strVarName);
+		ret = -1;
 	} else {
 		//printf("Variable '%s' is at offset %d and %d bits long\n", var.strVarName, var.i16uAddress, var.i16uLength);
 		ret = var.i16uAddress;
@@ -389,9 +422,10 @@ int piControlResetCounter(int address, int bitfield)
 	tel.i16uBitfield = bitfield;
 
 	ret = ioctl(PiControlHandle_g, KB_DIO_RESET_COUNTER, &tel);
-	if (ret < 0)
-		perror("Counter reset not possible");
-
+	if (ret < 0) {
+		fprintf(stderr, "Failed to reset counter: %s\n", strerror(errno));
+		return -1;
+	}
 	return ret;
 }
 
@@ -409,8 +443,8 @@ int piControlGetROCounters(int address)
 
 	ret = ioctl(PiControlHandle_g, KB_RO_GET_COUNTER, &ioc);
 	if (ret < 0) {
-		perror("Failed to get RO counters");
-		return ret;
+		fprintf(stderr, "Failed to get RO counters: %s\n", strerror(errno));
+		return -1;
 	}
 
 	printf("RO relay counters:\n");
@@ -467,8 +501,10 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 
 	piShowLastMessage();
 
-	if (ret)
-		return -errno;
+	if (ret) {
+		fprintf(stderr, "Failed to update device firmare: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -504,9 +540,10 @@ int piControlStopIO(int stop)
 		return ret;
 
 	ret = ioctl(PiControlHandle_g, KB_STOP_IO, &stop);
-	if (ret < 0)
-		perror("ioctl(KB_STOP_IO) returned error");
-
+	if (ret < 0) {
+		fprintf(stderr, "Failed to stop IO: %s\n", strerror(errno));
+		return -1;
+	}
 	return ret;
 }
 
@@ -542,5 +579,10 @@ int piControlCalibrate(int addr, int channl, int mode, int xval, int yval)
 		return ret;
 
 	ret = ioctl(PiControlHandle_g, KB_AIO_CALIBRATE, &cali);
+	if (ret < 0) {
+		fprintf(stderr, "Failed to calibrate: %s\n", strerror(errno));
+		return -1;
+	}
+
 	return ret;
 }
