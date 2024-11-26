@@ -9,6 +9,8 @@ include:
     file: "/package-devel.yml"
   - project: "revolutionpi/infrastructure/ci-templates"
     file: "/reuse-lint.yml"
+  - project: "revolutionpi/infrastructure/ci-templates"
+    file: "/check-commit/lint-commit.yml"
   - local: debian/gitlab-ci.yml
     rules:
       - if: $CI_COMMIT_BRANCH =~ /^(raspios|debian)\/.*/
