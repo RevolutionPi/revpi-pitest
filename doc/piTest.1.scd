@@ -1,0 +1,125 @@
+piTest(1)
+
+# NAME
+
+piTest - interact with in-kernel piControl process
+
+# SYNOPSIS
+
+*piTest* [_options_]
+
+# DESCRIPTION
+
+*piTest* allows listing the I/O and gateway modules attached to a RevPi Core or
+Connect, reading and writing values in the process image and resetting the
+in-kernel piControl process.
+
+Revolution Pi is a set of IoT products based on the Raspberry Pi and geared
+towards industrial usage.
+
+# OPTIONS
+
+Multiple of these options may be given to execute a sequence of actions:
+
+*-d*
+	Get device list.
+
+*-v* _variablename_
+	Shows infos for a variable.
+
+*-V*
+	Shows the version info for this program.
+
+*-1*
+	Executes the following read command only once.
+
+*-q*
+	Executes the following read command quietly, print the value only.
+
+*-r* _variablename_[,_f_]
+	Reads the value of a variable. It respects the length of variable as
+	defined in PiCtory. The optional parameter _f_ defines the format: h for
+	hex, d for decimal (default) and b for binary. The value is displayed
+	cyclically every second until Ctrl-C is pressed. E.g. _-r Input_001,h_
+	reads the value of variable *Input_001* and displays it ins hex format.
+
+*-r* _o_,_l_[,_f_]
+	Reads _l_ bytes at offset _o_. The optional parameter _f_ defines the
+	format: h for hext, d for decimal (default) and b for binary. The
+	value is displayed cyclically every second until Ctrl-C is pressed. E.g.
+	_-r 1188,16_ reads 16 bytes at offset 1188.
+
+*-w* _variablename_,_v_
+	Writes value _v_ to the variable _variablename_. It respects the length of
+	variable as defined in PiCtory. E.g. _-w Output_001,23_ writes the value
+	23 dec (= 17 hex) to variable *Output_001*.
+
+*-w* _o_,_l_,_v_
+	Write _l_ bytes with value _v_ (as dec) to offset _o_. Length should be one
+	of 1|2|4. E.g. _-w 0,4,31224205_ writes the value 31224205 to
+	the byte with offset 0 to 3.
+
+*-g* _o_,_b_
+	Gets bit _b_ (0-7) from byte at offset _o_. E.g. _-b 0,5_ gets bit 5 from
+	the byte at offset 0. The value is displayed cyclically every second
+	until Ctrl-C is pressed.
+
+*-s* _o_,_b_,_0/1_
+	Sets bit _b_ (0-7) of byte at offset _o_ to 0/1. E.g. _-b 0,5,1_ sets bit 5
+	of the byte at offset 0 to 1.
+
+*-R* _a_,_b_
+	Sets counter and encoder values to 0. _a_ is the address of a DIO or DI
+	module as displayed in the device list (option -d). _b_ is a bitfield
+	defining the counters/endcoders to reset. E.g. _-R 32,0x14_ reset the
+	counters on the inputs I2 and I5 because the bits 2 and 5 are set to 1. The
+	DIO must be the first module on the right of the RevPi.
+
+*-C* _address_
+	Retrieves the relay wear level counters of a RO module. _address_ is the
+	address of a RO module as displayed in the device list (option -d). E.g.
+	_-C 32_ retrieves the counters from a module with address 32. In this case
+	the RO module must be the first module on the right of the RevPi.
+
+*-f*
+	Starts the firmware update process. The option *--module* can be given
+	before this one to specify the address of the module to update. If
+	*--module* is not given before it, a module to update will be selected
+	automatically and only one module should be connected.++
+	The option *--force* can be given before this one to omit the firmware
+	version check. If *--force* is not given before it, a module is only updated
+	if the version of the firmware running on the module is smaller than the one
+	used for the update.
+
+*--module* _address_
+	Specify the module that the following flag should use with the _address_.
+	This option can be used with the *-f* flag to specify a specific module to
+	update.
+
+*--force*
+	Force a module update even if the firmware version is equal to or smaller
+	than the version of the firmware running on the target module. This option
+	can be used with the *-f* flag and requires the address of the target module
+	(option *--module*).
+
+*-l*
+	Listen for events such as a piControl reset initiated by another process.
+
+*-S*
+	Stop cyclic synchronization of the process image with attached I/O and
+	gateway modules. It is then possible to manually set values in the process
+	image using the _-w_ option and thereby simulate that these values were
+	received from the attached modules. To restart synchronization with
+	attached modules, invoke the program with _-S_ once more.
+
+*-x*
+	Reset control process.
+
+*-h*
+	Show summary of options.
+
+# SEE ALSO
+
+The source code of this program is available at
+https://gitlab.com/revolutionpi/revpi-pitest++
+For more information on Revolution Pi visit https://revolutionpi.com
