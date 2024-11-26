@@ -175,6 +175,8 @@ piTest -C 32
 
 # SEE ALSO
 
+*picontrol_ioctl*(4)
+
 The source code of this program is available at
 https://gitlab.com/revolutionpi/revpi-pitest++
 For more information on Revolution Pi visit https://revolutionpi.com
