@@ -40,46 +40,36 @@ Multiple of these options may be given to execute a sequence of actions:
 	Reads the value of a variable. It respects the length of variable as
 	defined in PiCtory. The optional parameter _f_ defines the format: h for
 	hex, d for decimal (default) and b for binary. The value is displayed
-	cyclically every second until Ctrl-C is pressed. E.g. _-r Input_001,h_
-	reads the value of variable *Input_001* and displays it ins hex format.
+	cyclically every second until Ctrl-C is pressed.
 
 *-r* _o_,_l_[,_f_]
 	Reads _l_ bytes at offset _o_. The optional parameter _f_ defines the
 	format: h for hext, d for decimal (default) and b for binary. The
-	value is displayed cyclically every second until Ctrl-C is pressed. E.g.
-	_-r 1188,16_ reads 16 bytes at offset 1188.
+	value is displayed cyclically every second until Ctrl-C is pressed.
 
 *-w* _variablename_,_v_
 	Writes value _v_ to the variable _variablename_. It respects the length of
-	variable as defined in PiCtory. E.g. _-w Output_001,23_ writes the value
-	23 dec (= 17 hex) to variable *Output_001*.
+	variable as defined in PiCtory.
 
 *-w* _o_,_l_,_v_
 	Write _l_ bytes with value _v_ (as dec) to offset _o_. Length should be one
-	of 1|2|4. E.g. _-w 0,4,31224205_ writes the value 31224205 to
-	the byte with offset 0 to 3.
+	of 1|2|4.
 
 *-g* _o_,_b_
-	Gets bit _b_ (0-7) from byte at offset _o_. E.g. _-b 0,5_ gets bit 5 from
-	the byte at offset 0. The value is displayed cyclically every second
-	until Ctrl-C is pressed.
+	Gets bit _b_ (0-7) from byte at offset _o_. The value is displayed
+	cyclically every second until Ctrl-C is pressed.
 
 *-s* _o_,_b_,_0/1_
-	Sets bit _b_ (0-7) of byte at offset _o_ to 0/1. E.g. _-b 0,5,1_ sets bit 5
-	of the byte at offset 0 to 1.
+	Sets bit _b_ (0-7) of byte at offset _o_ to 0/1.
 
 *-R* _a_,_b_
 	Sets counter and encoder values to 0. _a_ is the address of a DIO or DI
 	module as displayed in the device list (option -d). _b_ is a bitfield
-	defining the counters/endcoders to reset. E.g. _-R 32,0x14_ reset the
-	counters on the inputs I2 and I5 because the bits 2 and 5 are set to 1. The
-	DIO must be the first module on the right of the RevPi.
+	defining the counters/endcoders to reset.
 
 *-C* _address_
 	Retrieves the relay wear level counters of a RO module. _address_ is the
-	address of a RO module as displayed in the device list (option -d). E.g.
-	_-C 32_ retrieves the counters from a module with address 32. In this case
-	the RO module must be the first module on the right of the RevPi.
+	address of a RO module as displayed in the device list (option -d).
 
 *-f*
 	Starts the firmware update process. The option *--module* can be given
@@ -117,6 +107,58 @@ Multiple of these options may be given to execute a sequence of actions:
 
 *-h*
 	Show summary of options.
+
+# EXAMPLES
+
+Read the value of the variable *Input_001* and display it in hex format:
+
+```
+piTest -r Input_001,h
+```
+
+Read *16* bytes at offset *1188*:
+
+```
+piTest -r 1188,16
+```
+
+Write the value *23* to the variable *Output_001*:
+
+```
+piTest -w Output_001,23
+```
+
+Write the value *31224205* to the byte with offset *0* to *3*:
+
+```
+piTest -w 0,4,31224205
+```
+
+Get bit *5* from the byte at offset *0*:
+
+```
+piTest -b 0,5
+```
+
+Set bit *5* of the byte at offset *0* to *1*:
+
+```
+piTest -s 0,5,1
+```
+
+Reset the counters of the inputs *I2* and *I5* because the bits *2* and *5* are
+set to *1*:
+
+```
+piTest -R 32,0x14
+```
+
+Retrieve the counters from a module with address *32*, i.e. the first module on
+the right:
+
+```
+piTest -C 32
+```
 
 # SEE ALSO
 
