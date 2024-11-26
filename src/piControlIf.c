@@ -46,11 +46,19 @@ int PiControlHandle_g = -1;
  * Initialize the Pi Control Interface
  *
  ************************************************************************************/
-void piControlOpen(void)
+int piControlOpen(void)
 {
 	/* open handle if needed */
-	if (PiControlHandle_g < 0)
+	if (PiControlHandle_g < 0) {
 		PiControlHandle_g = open(PICONTROL_DEVICE, O_RDWR);
+		if (PiControlHandle_g < 0) {
+			fprintf(stderr, "Failed to open " PICONTROL_DEVICE ": %s\n",
+				strerror(errno));
+			return -1;
+		}
+	}
+
+	return 0;
 }
 
 /***********************************************************************************/
@@ -78,10 +86,11 @@ void piControlClose(void)
  ************************************************************************************/
 int piControlReset(void)
 {
-	piControlOpen();
+	int ret;
 
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	if (ioctl(PiControlHandle_g, KB_RESET, NULL) < 0)
 		return -errno;
@@ -99,11 +108,11 @@ int piControlReset(void)
 int piControlWaitForEvent(void)
 {
 	int event;
+	int ret;
 
-	piControlOpen();
-
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	if (ioctl(PiControlHandle_g, KB_WAIT_FOR_EVENT, &event) < 0)
 		return -errno;
@@ -127,11 +136,12 @@ int piControlWaitForEvent(void)
 int piControlRead(uint32_t Offset, uint32_t Length, uint8_t * pData)
 {
 	int BytesRead;
+	int ret;
 
-	piControlOpen();
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
 	/* seek */
 	if (lseek(PiControlHandle_g, Offset, SEEK_SET) < 0)
 		return -errno;
@@ -159,11 +169,11 @@ int piControlRead(uint32_t Offset, uint32_t Length, uint8_t * pData)
 int piControlWrite(uint32_t Offset, uint32_t Length, uint8_t * pData)
 {
 	int BytesWritten;
+	int ret;
 
-	piControlOpen();
-
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	/* seek */
 	if (lseek(PiControlHandle_g, Offset, SEEK_SET) < 0)
@@ -190,10 +200,11 @@ int piControlWrite(uint32_t Offset, uint32_t Length, uint8_t * pData)
  ************************************************************************************/
 int piControlGetDeviceInfo(SDeviceInfo * pDev)
 {
-	piControlOpen();
+	int ret;
 
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	if (ioctl(PiControlHandle_g, KB_GET_DEVICE_INFO, pDev) < 0)
 		return -errno;
@@ -215,8 +226,11 @@ int piControlGetDeviceInfo(SDeviceInfo * pDev)
 int piControlGetDeviceInfoList(SDeviceInfo * pDev)
 {
 	int cnt;
+	int ret;
 
-	piControlOpen();
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	if (PiControlHandle_g < 0)
 		return -ENODEV;
@@ -241,10 +255,11 @@ int piControlGetDeviceInfoList(SDeviceInfo * pDev)
  ************************************************************************************/
 int piControlGetBitValue(SPIValue * pSpiValue)
 {
-	piControlOpen();
+	int ret;
 
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	pSpiValue->i16uAddress += pSpiValue->i8uBit / 8;
 	pSpiValue->i8uBit %= 8;
@@ -268,10 +283,11 @@ int piControlGetBitValue(SPIValue * pSpiValue)
  ************************************************************************************/
 int piControlSetBitValue(SPIValue * pSpiValue)
 {
-	piControlOpen();
+	int ret;
 
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	pSpiValue->i16uAddress += pSpiValue->i8uBit / 8;
 	pSpiValue->i8uBit %= 8;
@@ -295,10 +311,11 @@ int piControlSetBitValue(SPIValue * pSpiValue)
  ************************************************************************************/
 int piControlGetVariableInfo(SPIVariable * pSpiVariable)
 {
-	piControlOpen();
+	int ret;
 
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	if (ioctl(PiControlHandle_g, KB_FIND_VARIABLE, pSpiVariable) < 0)
 		return -errno;
@@ -323,10 +340,9 @@ int piControlFindVariable(const char *name)
 	SPIVariable var;
 	int ret;
 
-	piControlOpen();
-
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	strncpy(var.strVarName, name, sizeof(var.strVarName));
 	var.strVarName[sizeof(var.strVarName) - 1] = 0;
@@ -365,10 +381,9 @@ int piControlResetCounter(int address, int bitfield)
 	SDIOResetCounter tel;
 	int ret;
 
-	piControlOpen();
-
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	tel.i8uAddress = address;
 	tel.i16uBitfield = bitfield;
@@ -386,10 +401,9 @@ int piControlGetROCounters(int address)
 	int ret;
 	int i;
 
-	piControlOpen();
-
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	ioc.addr = address;
 
@@ -434,10 +448,9 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 	struct picontrol_firmware_upload fwu;
 	int ret;
 
-	piControlOpen();
-
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	memset(&fwu, 0, sizeof(fwu));
 	fwu.addr = addr_p;
@@ -486,10 +499,9 @@ int piControlStopIO(int stop)
 {
 	int ret;
 
-	piControlOpen();
-
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	ret = ioctl(PiControlHandle_g, KB_STOP_IO, &stop);
 	if (ret < 0)
@@ -525,10 +537,9 @@ int piControlCalibrate(int addr, int channl, int mode, int xval, int yval)
 	cali.x_val = xval;
 	cali.y_val = yval;
 
-	piControlOpen();
-
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
+	ret = piControlOpen();
+	if (ret < 0)
+		return ret;
 
 	ret = ioctl(PiControlHandle_g, KB_AIO_CALIBRATE, &cali);
 	return ret;
