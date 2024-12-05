@@ -9,7 +9,7 @@ set(SOURCES
 )
 
 add_executable(${TARGET} ${SOURCES})
-target_include_directories(${TARGET} PRIVATE ../include ../lib/piControl)
+target_include_directories(${TARGET} PRIVATE ../include ../lib/piControl/src)
 
 install(TARGETS ${TARGET} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
