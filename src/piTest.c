@@ -25,6 +25,8 @@
 #include "piControlIf.h"
 #include "piControl.h"
 
+#define PROGRAM_VERSION		"1.8.0"
+
 /* long option names */
 # define MODULE_LONG_ARG_NAME "module"
 # define FORCE_LONG_ARG_NAME "force"
@@ -702,6 +704,11 @@ void showVariableInfo(char *pszVariableName)
 	}
 }
 
+static void printVersion(char *programname)
+{
+	printf("%s version %s\n", programname, PROGRAM_VERSION);
+}
+
 /***********************************************************************************/
 /*!
  * @brief Shows help for this program
@@ -720,6 +727,8 @@ void printHelp(char *programname)
 	printf("                 -d: Get device list.\n");
 	printf("\n");
 	printf("      -v <var_name>: Shows infos for a variable.\n");
+	printf("\n");
+	printf("      -V           : Print this programs version.\n");
 	printf("\n");
 	printf("                 -1: execute the following read only once.\n");
 	printf("\n");
@@ -853,7 +862,7 @@ int main(int argc, char *argv[])
 	int option_index = 0;
 
 	// Scan argument
-	while ((c = getopt_long(argc, argv, "dv:1qr:w:s:R:C:c:g:xlfS",
+	while ((c = getopt_long(argc, argv, "dv:V1qr:w:s:R:C:c:g:xlfS",
 				long_options, &option_index)) != -1) {
 		switch (c) {
 		case 0:
@@ -891,6 +900,10 @@ int main(int argc, char *argv[])
 			} else {
 				printf("No variable name\n");
 			}
+			break;
+
+		case 'V':
+			printVersion(progname);
 			break;
 
 		case '1':	// execute the command only once, not cyclic
