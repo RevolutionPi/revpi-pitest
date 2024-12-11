@@ -85,14 +85,12 @@ Multiple of these options may be given to execute a sequence of actions:
 	address of a RO module as displayed in the device list (option -d).
 
 *-f*
-	Starts the firmware update process. The option *--module* can be given
-	before this one to specify the address of the module to update. If
-	*--module* is not given before it, a module to update will be selected
-	automatically and only one module should be connected.++
-	The option *--force* can be given before this one to omit the firmware
-	version check. If *--force* is not given before it, a module is only updated
-	if the version of the firmware running on the module is smaller than the one
-	used for the update.
+	Starts the firmware update process. When used the firmware will only be
+	updated if the update is newer than the version running on the module. This
+	behaviour can be changed with the *--force* flag.
+
+	The option *--module* can be used to specify a specific module to update
+	instead of automatically selecting one.
 
 *--module* _address_
 	Specify the module that the following flag should use with the _address_.
