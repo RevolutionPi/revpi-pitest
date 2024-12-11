@@ -28,9 +28,6 @@
 #include "piControlIf.h"
 
 #include "piControl.h"
-#ifdef KUNBUS_TEST
-#include <IoProtocol.h>
-#endif
 
 /******************************************************************************/
 /******************************  Global Vars  *********************************/
@@ -541,63 +538,3 @@ int piControlCalibrate(int addr, int channl, int mode, int xval, int yval)
 	ret = ioctl(PiControlHandle_g, KB_AIO_CALIBRATE, &cali);
 	return ret;
 }
-
-
-#ifdef KUNBUS_TEST
-/***********************************************************************************/
-/* for internal use by KUNBUS only.
- ************************************************************************************/
-int piControlIntMsg(int msg, unsigned char *data, int size)
-{
-	SIOGeneric telegram;
-	int ret;
-	int i;
-
-	piControlOpen();
-
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
-
-	telegram.uHeader.sHeaderTyp1.bitAddress = 32;
-	telegram.uHeader.sHeaderTyp1.bitIoHeaderType = 0;
-	telegram.uHeader.sHeaderTyp1.bitReqResp = 0;
-	telegram.uHeader.sHeaderTyp1.bitLength = size;
-	telegram.uHeader.sHeaderTyp1.bitCommand = msg;
-	if (data != NULL)
-		memcpy(telegram.ai8uData, data, size);
-
-	ret = ioctl(PiControlHandle_g, KB_INTERN_IO_MSG, &telegram);
-	if (ret < 0) {
-		printf("error %d in ioctl\n", ret);
-	} else {
-		printf("got response with %d bytes\n", telegram.uHeader.sHeaderTyp1.bitLength);
-
-		for (i = 0; i < telegram.uHeader.sHeaderTyp1.bitLength; i++) {
-			printf("%02x ", telegram.ai8uData[i]);
-		}
-		printf("\n");
-	}
-	return ret;
-}
-
-/***********************************************************************************/
-/* for internal use by KUNBUS only.
- ************************************************************************************/
-int piControlSetSerial(int addr, int serial)
-{
-	data[1] = serial;
-	data[0] = addr;
-	INT32U data[2];
-	int ret;
-
-	piControlOpen();
-
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
-
-	ret = ioctl(PiControlHandle_g, KB_INTERN_SET_SERIAL_NUM, data);
-	return ret;
-}
-
-#endif
-
