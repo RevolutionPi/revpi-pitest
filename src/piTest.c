@@ -765,7 +765,7 @@ void printHelp(char *programname)
 	printf("\n");
 	printf("      -v <var_name>: Shows infos for a variable.\n");
 	printf("\n");
-	printf("      -V           : Print this programs version.\n");
+	printf("                 -V: Print this programs version.\n");
 	printf("\n");
 	printf("                 -1: execute the following read only once.\n");
 	printf("\n");
