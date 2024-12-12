@@ -482,6 +482,13 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 	struct picontrol_firmware_upload fwu;
 	int ret;
 
+	if (addr_p == 0) {
+		fprintf(stderr,
+			"A firmware update on the module with address %" PRIu32
+			" (i.e. the Revolution Pi) is invalid.\n", addr_p);
+		return -EINVAL;
+	}
+
 	ret = piControlOpen();
 	if (ret < 0)
 		return ret;
@@ -489,11 +496,6 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 	memset(&fwu, 0, sizeof(fwu));
 	fwu.addr = addr_p;
 	if (force_update) {
-		if (!fwu.addr) {
-			fprintf(stderr,
-				"Error: no module address given for forced firmware update.\n");
-			return -EINVAL;
-		}
 		fwu.flags |= PICONTROL_FIRMWARE_FORCE_UPLOAD;
 	}
 
