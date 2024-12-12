@@ -502,7 +502,8 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 	piShowLastMessage();
 
 	if (ret < 0) {
-		fprintf(stderr, "Failed to update device firmare: %s\n", strerror(errno));
+		fprintf(stderr, "Failed to update firmware of module with address %"
+			PRIu32 ": %s\n", addr_p, strerror(errno));
 		return -1;
 	} else if (ret == 0) {
 		printf("Firmware for module with address %" PRIu32
