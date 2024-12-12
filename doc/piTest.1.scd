@@ -16,7 +16,7 @@ piTest - interact with in-kernel piControl process
 *piTest* *-s* _o_,_b_,(*0*|*1*)++
 *piTest* *-R* _a_,_b_++
 *piTest* *-C* _address_++
-*piTest* [*--module* _address_] *-f*++
+*piTest* [*--module* _address_] [*--force*] *-f*++
 *piTest* *-l*++
 *piTest* *-S*++
 *piTest* *-x*
