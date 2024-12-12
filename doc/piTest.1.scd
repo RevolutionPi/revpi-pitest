@@ -97,6 +97,9 @@ Multiple of these options may be given to execute a sequence of actions:
 	This option can be used with the *-f* flag to specify a specific module to
 	update.
 
+	The value of _address_ must be greater than *0* as updating the Revolution
+	Pi (which always has an address of *0*) is unsupported.
+
 *--force*
 	Force a module update even if the firmware version is equal to or smaller
 	than the version of the firmware running on the target module. This option
