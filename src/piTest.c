@@ -866,7 +866,7 @@ int main(int argc, char *argv[])
 	// Used for the `-f` option. If `--module <arg>` is not given *before* the
 	// `-f` option the default value of `0` is used, which will automatically
 	// choose which module to update.
-	unsigned int module_address = 0;
+	int module_address = -1;
 	char szVariableName[256];
 	char *pszTok, *progname;
 	int force_update = 0;
@@ -911,6 +911,11 @@ int main(int argc, char *argv[])
 					if (endptr == optarg) {
 						fprintf(stderr, "Invalid argument '%s' to option '%s'\n", optarg,
 							long_options[option_index].name);
+						return 1;
+					}
+					if (module_address < 0) {
+						fprintf(stderr,
+							"The address of a module must be a positive number\n");
 						return 1;
 					}
 					break;
@@ -1137,6 +1142,12 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'f':
+			if (module_address < 0) {
+				fprintf(stderr,
+					"A module address must be given for an update and it must be placed before the -f parameter\n");
+				return 1;
+			}
+
 			rc = piControlUpdateFirmware(module_address, force_update);
 			if (rc) {
 				fprintf(stderr, "Failed to update firmware\n");
