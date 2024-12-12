@@ -460,7 +460,8 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 		}
 		ret = ioctl(PiControlHandle_g, KB_UPDATE_DEVICE_FIRMWARE, NULL);
 		if (ret < 0) {
-			fprintf(stderr, "Failed to update device firmare: %s\n", strerror(errno));
+			fprintf(stderr, "Failed to update firmware of module with address %"
+				PRIu32 ": %s\n", addr_p, strerror(errno));
 			return -1;
 		} else {
 			printf("Firmware updated successfully.\n");
@@ -478,7 +479,8 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 
 		ret = ioctl(PiControlHandle_g, PICONTROL_UPLOAD_FIRMWARE, &fwu);
 		if (ret < 0) {
-			fprintf(stderr, "Failed to update device firmare: %s\n", strerror(errno));
+			fprintf(stderr, "Failed to update firmware of module with address %"
+				PRIu32 ": %s\n", addr_p, strerror(errno));
 			return -1;
 		} else if (ret == 0) {
 			printf("Firmware for module with address %" PRIu32
