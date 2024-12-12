@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -458,6 +459,10 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 			return -EINVAL;
 		}
 		ret = ioctl(PiControlHandle_g, KB_UPDATE_DEVICE_FIRMWARE, NULL);
+		if (ret < 0) {
+			fprintf(stderr, "Failed to update device firmare: %s\n", strerror(errno));
+			return -1;
+		}
 
 		piShowLastMessage();
 	} else {
@@ -470,6 +475,13 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 			fwu.flags |= PICONTROL_FIRMWARE_FORCE_UPLOAD;
 
 		ret = ioctl(PiControlHandle_g, PICONTROL_UPLOAD_FIRMWARE, &fwu);
+		if (ret < 0) {
+			fprintf(stderr, "Failed to update device firmare: %s\n", strerror(errno));
+			return -1;
+		} else if (ret == 1) {
+			printf("Firmware of module with address %" PRIu32
+				" is already up to date.\n", addr_p);
+		}
 	}
 
 	if (ret)
