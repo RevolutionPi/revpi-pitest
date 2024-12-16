@@ -466,8 +466,6 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 		} else {
 			printf("Firmware updated successfully.\n");
 		}
-
-		piShowLastMessage();
 	} else {
 		struct picontrol_firmware_upload fwu;
 
