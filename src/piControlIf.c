@@ -500,9 +500,6 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 	}
 
 	ret = ioctl(PiControlHandle_g, PICONTROL_UPLOAD_FIRMWARE, &fwu);
-
-	piShowLastMessage();
-
 	if (ret < 0) {
 		fprintf(stderr, "Failed to update firmware of module with address %"
 			PRIu32 ": %s\n", addr_p, strerror(errno));
