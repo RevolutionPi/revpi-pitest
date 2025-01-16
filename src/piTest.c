@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2016-2023 KUNBUS GmbH
+// SPDX-FileCopyrightText: 2016-2025 KUNBUS GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -26,7 +26,7 @@
 #include "piControlIf.h"
 #include "piControl.h"
 
-#define PROGRAM_VERSION		"1.8.0"
+#define PROGRAM_VERSION		"2.0.0"
 
 /* long option names */
 # define MODULE_LONG_ARG_NAME "module"
