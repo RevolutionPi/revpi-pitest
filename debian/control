@@ -8,7 +8,8 @@ Vcs-Browser: https://gitlab.com/revolutionpi/revpi-pitest
 Vcs-Git: https://gitlab.com/revolutionpi/revpi-pitest.git -b debian/bookworm
 Build-Depends:
   cmake,
-  debhelper-compat (= 13)
+  debhelper-compat (= 13),
+  scdoc,
 Standards-Version: 4.6.2
 
 Package: pitest
