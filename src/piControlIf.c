@@ -452,6 +452,9 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 	if (ret < 0)
 		return ret;
 
+	printf("Updating Firmware%s!\n", force_update ? " (forced)" : "");
+	printf("This can take a while. Do not switch off the system!\n");
+
 	if (!addr_p) { /* only supported with legacy ioctl */
 		if (force_update) {
 			fprintf(stderr,
@@ -486,6 +489,7 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 		} else if (ret == 1) {
 			printf("Firmware of module with address %" PRIu32
 				" is already up to date.\n", addr_p);
+			printf("Use '--force' to force firmware update.\n");
 		}
 	}
 
