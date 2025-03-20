@@ -106,6 +106,10 @@ Multiple of these options may be given to execute a sequence of actions:
 	can be used with the *-f* flag and requires the address of the target module
 	(option *--module*).
 
+*--assume-yes*
+	Don't ask for confirmation when updating the firmware with *-f*. In order to
+	have an effect this needs to be given before the *-f* option.
+
 *-l*
 	Listen for events such as a piControl reset initiated by another process.
 

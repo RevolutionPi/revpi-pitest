@@ -21,6 +21,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #include "piControlIf.h"
 #include "piControl.h"
@@ -30,10 +31,12 @@
 /* long option names */
 # define MODULE_LONG_ARG_NAME "module"
 # define FORCE_LONG_ARG_NAME "force"
+# define ASSUME_YES_LONG_ARG_NAME "assume-yes"
 
 /* long option indices */
 # define MODULE_LONG_ARG_INDEX 0
 # define FORCE_LONG_ARG_INDEX  1
+# define ASSUME_YES_LONG_ARG_INDEX 2
 
 /***********************************************************************************/
 /*!
@@ -709,6 +712,41 @@ static void printVersion(char *programname)
 	printf("%s version %s\n", programname, PROGRAM_VERSION);
 }
 
+static int handleFirmwareUpdate(int module_address, int force_update, int assume_yes)
+{
+	int rc;
+	ssize_t read = 0;
+	char *buf;
+	size_t buf_len = 0;
+	char response = 'X';
+
+	if (!assume_yes) {
+		printf("Are you sure you want to update the firmware of a RevPi module? (y/N) ");
+		read = getline(&buf, &buf_len, stdin);
+		if (read < 0 && !feof(stdin)) {
+			fprintf(stderr, "error occurred while reading from stdin: %d (%s)\n", errno, strerror(errno));
+			free(buf);
+			return -errno;
+		}
+
+		if (read < 1 || tolower(buf[0]) != 'y') {
+			printf("Aborting firmware update\n");
+			free(buf);
+			return 0;
+		}
+
+		free(buf);
+	}
+
+	rc = piControlUpdateFirmware(module_address, force_update);
+	if (rc != 0) {
+		fprintf(stderr, "failed to update firmware: %s\n", strerror(-rc));
+		return rc;
+	}
+
+	return rc;
+}
+
 /***********************************************************************************/
 /*!
  * @brief Shows help for this program
@@ -798,6 +836,10 @@ void printHelp(char *programname)
 	printf("                     E.g.: --force -f\n");
 	printf("                     It can be combined with the \"--module\" option.\n");
 	printf("\n");
+	printf("       --assume-yes: Don't ask for confirmation when updating the firmware with -f\n");
+	printf("                     In order to have an effect this needs to be given before the -f option.\n");
+	printf("                     E.g.: --assume-yes -f\n");
+	printf("\n");
 	printf("  -c <addr>,<c>,<m>,<x>,<y>: Do the calibration. (see tutorials on website for more info)\n");
 	printf("                     <addr> is the address of module as displayed with option -d.\n");
 	printf("                     <c> is the bitmap of channels\n");
@@ -830,6 +872,7 @@ int main(int argc, char *argv[])
 	// `-f` option the default value of `0` is used, which will automatically
 	// choose which module to update.
 	unsigned int module_address = 0;
+	int assume_yes = 0;
 	char szVariableName[256];
 	char *pszTok, *progname;
 	int force_update = 0;
@@ -857,6 +900,7 @@ int main(int argc, char *argv[])
 	struct option long_options[] = {
 		[MODULE_LONG_ARG_INDEX] = { MODULE_LONG_ARG_NAME, required_argument, NULL, 0 },
 		[FORCE_LONG_ARG_INDEX] = { FORCE_LONG_ARG_NAME, no_argument, &force_update, 1 },
+		[ASSUME_YES_LONG_ARG_INDEX] = { ASSUME_YES_LONG_ARG_NAME, no_argument, &assume_yes, 1 },
 		{0, 0, 0, 0}
 	};
 	int option_index = 0;
@@ -881,6 +925,9 @@ int main(int argc, char *argv[])
 				}
 
 				case FORCE_LONG_ARG_INDEX:
+					break;
+
+				case ASSUME_YES_LONG_ARG_INDEX:
 					break;
 
 				default:
@@ -1049,9 +1096,9 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'f':
-			rc = piControlUpdateFirmware(module_address, force_update);
+			rc = handleFirmwareUpdate(module_address, force_update, assume_yes);
 			if (rc) {
-				printf("piControlUpdateFirmware returned: %d (%s)\n", rc, strerror(-rc));
+				fprintf(stderr, "error when updating firmware: %s\n", strerror(-rc));
 				return rc;
 			}
 			break;
