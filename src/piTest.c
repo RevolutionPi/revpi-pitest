@@ -772,7 +772,7 @@ static void *spinner_thread_start(void *arg)
 	}
 }
 
-static int handleFirmwareUpdate(int module_address, int force_update, int assume_yes)
+static int handleFirmwareUpdate(int module_address, int force_update, int assume_yes, bool quiet)
 {
 	int rc;
 	int ret = 0;
@@ -806,10 +806,12 @@ static int handleFirmwareUpdate(int module_address, int force_update, int assume
 		free(buf);
 	}
 
-	rc = pthread_create(&spinner_thread_id, NULL, &spinner_thread_start, NULL);
-	if (rc != 0) {
-		fprintf(stderr, "error creating spinner thread: %d (%s)\n", rc, strerror(rc));
-		return -rc;
+	if (!quiet) {
+		rc = pthread_create(&spinner_thread_id, NULL, &spinner_thread_start, NULL);
+		if (rc != 0) {
+			fprintf(stderr, "error creating spinner thread: %d (%s)\n", rc, strerror(rc));
+			return -rc;
+		}
 	}
 
 	rc = piControlUpdateFirmware(module_address, force_update);
@@ -820,10 +822,12 @@ static int handleFirmwareUpdate(int module_address, int force_update, int assume
 	}
 
 cleanupSpinnerThread:
-	rc = pthread_cancel(spinner_thread_id);
-	if (rc != 0) {
-		fprintf(stderr, "error cancelling spinner thread: %d (%s)\n", rc, strerror(rc));
-		return -rc;
+	if (!quiet) {
+		rc = pthread_cancel(spinner_thread_id);
+		if (rc != 0) {
+			fprintf(stderr, "error cancelling spinner thread: %d (%s)\n", rc, strerror(rc));
+			return -rc;
+		}
 	}
 
 	return ret;
@@ -853,6 +857,7 @@ void printHelp(char *programname)
 	printf("                 -1: execute the following read only once.\n");
 	printf("\n");
 	printf("                 -q: execute the following read quietly, print only the value.\n");
+	printf("                     Can also be used to suppress the spinner output from a firmware update.\n");
 	printf("\n");
 	printf("-r <var_name>[,<f>]: Reads value of a variable.\n");
 	printf("                     <f> defines the format: h for hex, d for decimal (default), b for binary\n");
@@ -1234,7 +1239,7 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'f':
-			rc = handleFirmwareUpdate(module_address, force_update, assume_yes);
+			rc = handleFirmwareUpdate(module_address, force_update, assume_yes, quiet);
 			if (rc) {
 				fprintf(stderr, "error when updating firmware: %s\n", strerror(-rc));
 				return rc;
