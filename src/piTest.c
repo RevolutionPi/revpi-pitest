@@ -22,11 +22,15 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include "piControlIf.h"
 #include "piControl.h"
 
 #define PROGRAM_VERSION		"2.0.0"
+
+#define SEC_AS_USEC 1000000
+#define NUM_SPINS_PER_SECOND 16
 
 /* long option names */
 # define MODULE_LONG_ARG_NAME "module"
@@ -748,13 +752,35 @@ static void printVersion(char *programname)
 	printf("%s version %s\n", programname, PROGRAM_VERSION);
 }
 
+static void *spinner_thread_start(void *arg)
+{
+	char spinner_states[] = { '-', '\\', '|', '/' };
+	size_t spinner_states_len = sizeof(spinner_states) / sizeof(spinner_states[0]);
+	int spinner_pos;
+
+	for (spinner_pos = 0; ; spinner_pos = (spinner_pos + 1) % spinner_states_len) {
+		printf("%c\r", spinner_states[spinner_pos]);
+		if (fflush(stdout) != 0) {
+			fprintf(stderr, "spinner thread: error flushing stdout: %d (%s)\n", errno, strerror(errno));
+			return NULL;
+		}
+		// transition spinner state 16 times per second
+		if (usleep(SEC_AS_USEC / NUM_SPINS_PER_SECOND) != 0) {
+			fprintf(stderr, "spinner thread: error sleeping: %d (%s)\n", errno, strerror(errno));
+			return NULL;
+		}
+	}
+}
+
 static int handleFirmwareUpdate(int module_address, int force_update, int assume_yes)
 {
 	int rc;
+	int ret = 0;
 	ssize_t read = 0;
 	char *buf;
 	size_t buf_len = 0;
 	char response = 'X';
+	pthread_t spinner_thread_id;
 
 	if (module_address < 0) {
 		fprintf(stderr,
@@ -780,13 +806,27 @@ static int handleFirmwareUpdate(int module_address, int force_update, int assume
 		free(buf);
 	}
 
+	rc = pthread_create(&spinner_thread_id, NULL, &spinner_thread_start, NULL);
+	if (rc != 0) {
+		fprintf(stderr, "error creating spinner thread: %d (%s)\n", rc, strerror(rc));
+		return -rc;
+	}
+
 	rc = piControlUpdateFirmware(module_address, force_update);
 	if (rc != 0) {
 		fprintf(stderr, "failed to update firmware: %s\n", strerror(-rc));
-		return rc;
+		ret = rc;
+		goto cleanupSpinnerThread;
 	}
 
-	return rc;
+cleanupSpinnerThread:
+	rc = pthread_cancel(spinner_thread_id);
+	if (rc != 0) {
+		fprintf(stderr, "error cancelling spinner thread: %d (%s)\n", rc, strerror(rc));
+		return -rc;
+	}
+
+	return ret;
 }
 
 /***********************************************************************************/
