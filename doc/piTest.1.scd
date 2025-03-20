@@ -47,7 +47,8 @@ Multiple of these options may be given to execute a sequence of actions:
 	Executes the following read command only once.
 
 *-q*
-	Executes the following read command quietly, print the value only.
+	Executes the following read command quietly, print the value only. Can also
+	be used to suppress the spinner output from a firmware update.
 
 *-r* _variablename_[,_f_]
 	Reads the value of a variable. It respects the length of variable as
