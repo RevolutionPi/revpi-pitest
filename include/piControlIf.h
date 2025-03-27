@@ -1,34 +1,6 @@
-/*!
- * SPDX-License-Identifier: MIT
- *
- * Project: Pi Control
- *
- * Copyright (C) 2017 : KUNBUS GmbH, Heerweg 15C, 73370 Denkendorf, Germany
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * \file piControlIf.c
- *
- * \brief PI Control Interface
- *
- *
- */
+// SPDX-FileCopyrightText: 2017-2024 KUNBUS GmbH
+//
+// SPDX-License-Identifier: MIT
 
 #ifndef PICONTROLIF_H_
 #define PICONTROLIF_H_
@@ -38,6 +10,7 @@
 /******************************************************************************/
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <piControl.h>
 
 
@@ -67,13 +40,9 @@ int piControlFindVariable(const char *name);
 int piControlResetCounter(int address, int bitfield);
 int piControlGetROCounters(int address);
 int piControlWaitForEvent(void);
-int piControlUpdateFirmware(uint32_t addr_p);
+int piControlUpdateFirmware(uint32_t addr_p, bool force_update);
 int piControlStopIO(int stop);
 void piShowLastMessage(void);
-#ifdef KUNBUS_TEST
-int piControlIntMsg(int msg, unsigned char *data, int size);
-int piControlSetSerial(int addr, int serial);
-#endif
 int piControlCalibrate(int addr, int channl, int mode, int xval, int yval);
 
 void piControlClose(void);
