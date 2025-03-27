@@ -21,15 +21,26 @@
 #include <time.h>
 #include <sys/types.h>
 #include <stdbool.h>
+#include <errno.h>
+#include <pthread.h>
 
 #include "piControlIf.h"
 #include "piControl.h"
 
+#define PROGRAM_VERSION		"1.8.0"
+
+#define SEC_AS_USEC 1000000
+#define NUM_SPINS_PER_SECOND 16
+
 /* long option names */
 # define MODULE_LONG_ARG_NAME "module"
+# define FORCE_LONG_ARG_NAME "force"
+# define ASSUME_YES_LONG_ARG_NAME "assume-yes"
 
 /* long option indices */
 # define MODULE_LONG_ARG_INDEX 0
+# define FORCE_LONG_ARG_INDEX  1
+# define ASSUME_YES_LONG_ARG_INDEX 2
 
 /***********************************************************************************/
 /*!
@@ -700,6 +711,86 @@ void showVariableInfo(char *pszVariableName)
 	}
 }
 
+static void printVersion(char *programname)
+{
+	printf("%s version %s\n", programname, PROGRAM_VERSION);
+}
+
+static void *spinner_thread_start(void *arg)
+{
+	char spinner_states[] = { '-', '\\', '|', '/' };
+	size_t spinner_states_len = sizeof(spinner_states) / sizeof(spinner_states[0]);
+	int spinner_pos;
+
+	for (spinner_pos = 0; ; spinner_pos = (spinner_pos + 1) % spinner_states_len) {
+		printf("%c\r", spinner_states[spinner_pos]);
+		if (fflush(stdout) != 0) {
+			fprintf(stderr, "spinner thread: error flushing stdout: %d (%s)\n", errno, strerror(errno));
+			return NULL;
+		}
+		// transition spinner state 16 times per second
+		if (usleep(SEC_AS_USEC / NUM_SPINS_PER_SECOND) != 0) {
+			fprintf(stderr, "spinner thread: error sleeping: %d (%s)\n", errno, strerror(errno));
+			return NULL;
+		}
+	}
+}
+
+static int handleFirmwareUpdate(int module_address, int force_update, int assume_yes, bool quiet)
+{
+	int rc;
+	int ret = 0;
+	ssize_t read = 0;
+	char *buf;
+	size_t buf_len = 0;
+	char response = 'X';
+	pthread_t spinner_thread_id;
+
+	if (!assume_yes) {
+		printf("Are you sure you want to update the firmware of a RevPi module? (y/N) ");
+		read = getline(&buf, &buf_len, stdin);
+		if (read < 0 && !feof(stdin)) {
+			fprintf(stderr, "error occurred while reading from stdin: %d (%s)\n", errno, strerror(errno));
+			free(buf);
+			return -errno;
+		}
+
+		if (read < 1 || tolower(buf[0]) != 'y') {
+			printf("Aborting firmware update\n");
+			free(buf);
+			return 0;
+		}
+
+		free(buf);
+	}
+
+	if (!quiet) {
+		rc = pthread_create(&spinner_thread_id, NULL, &spinner_thread_start, NULL);
+		if (rc != 0) {
+			fprintf(stderr, "error creating spinner thread: %d (%s)\n", rc, strerror(rc));
+			return -rc;
+		}
+	}
+
+	rc = piControlUpdateFirmware(module_address, force_update);
+	if (rc != 0) {
+		fprintf(stderr, "failed to update firmware: %s\n", strerror(-rc));
+		ret = rc;
+		goto cleanupSpinnerThread;
+	}
+
+cleanupSpinnerThread:
+	if (!quiet) {
+		rc = pthread_cancel(spinner_thread_id);
+		if (rc != 0) {
+			fprintf(stderr, "error cancelling spinner thread: %d (%s)\n", rc, strerror(rc));
+			return -rc;
+		}
+	}
+
+	return ret;
+}
+
 /***********************************************************************************/
 /*!
  * @brief Shows help for this program
@@ -719,9 +810,12 @@ void printHelp(char *programname)
 	printf("\n");
 	printf("      -v <var_name>: Shows infos for a variable.\n");
 	printf("\n");
+	printf("                 -V: Print this programs version.\n");
+	printf("\n");
 	printf("                 -1: execute the following read only once.\n");
 	printf("\n");
 	printf("                 -q: execute the following read quietly, print only the value.\n");
+	printf("                     Can also be used to suppress the spinner output from a firmware update.\n");
 	printf("\n");
 	printf("-r <var_name>[,<f>]: Reads value of a variable.\n");
 	printf("                     <f> defines the format: h for hex, d for decimal (default), b for binary\n");
@@ -773,11 +867,23 @@ void printHelp(char *programname)
 	printf("                 -f: Update firmware. (see tutorials on website for more info)\n");
 	printf("                     The option \"--module <addr>\" can be given before this one to specify the address of the module to update.\n");
 	printf("                     If the \"--module <addr>\" is not given before it a module to update will be selected automatically.\n");
+	printf("                     The option \"--force \" can be given before this one to ignore the firmware version check.\n");
 	printf("\n");
 	printf("    --module <addr>: <addr> specifies the address of the module to use for another option.\n");
 	printf("                     This options can be used with the \"-f\" flag to specify a specific module to update.\n");
 	printf("                     In order for the \"-f\" flag to recognize the address, this option has to be given directly before it.\n");
 	printf("                     E.g.: --module 31 -f\n");
+	printf("                     It can be combined with the \"--force\" option.\n");
+	printf("\n");
+	printf("            --force: Enforce the firmware update.\n");
+	printf("                     This options can be used with the \"-f\" flag to force a firmware update.\n");
+	printf("                     In order for the \"-f\" flag to recognize it, this option has to be given before it.\n");
+	printf("                     E.g.: --force -f\n");
+	printf("                     It can be combined with the \"--module\" option.\n");
+	printf("\n");
+	printf("       --assume-yes: Don't ask for confirmation when updating the firmware with -f\n");
+	printf("                     In order to have an effect this needs to be given before the -f option.\n");
+	printf("                     E.g.: --assume-yes -f\n");
 	printf("\n");
 	printf("  -c <addr>,<c>,<m>,<x>,<y>: Do the calibration. (see tutorials on website for more info)\n");
 	printf("                     <addr> is the address of module as displayed with option -d.\n");
@@ -811,8 +917,10 @@ int main(int argc, char *argv[])
 	// `-f` option the default value of `0` is used, which will automatically
 	// choose which module to update.
 	unsigned int module_address = 0;
+	int assume_yes = 0;
 	char szVariableName[256];
 	char *pszTok, *progname;
+	int force_update = 0;
 
 	progname = strrchr(argv[0], '/');
 	if (!progname) {
@@ -836,12 +944,14 @@ int main(int argc, char *argv[])
 
 	struct option long_options[] = {
 		[MODULE_LONG_ARG_INDEX] = { MODULE_LONG_ARG_NAME, required_argument, NULL, 0 },
-		{}
+		[FORCE_LONG_ARG_INDEX] = { FORCE_LONG_ARG_NAME, no_argument, &force_update, 1 },
+		[ASSUME_YES_LONG_ARG_INDEX] = { ASSUME_YES_LONG_ARG_NAME, no_argument, &assume_yes, 1 },
+		{0, 0, 0, 0}
 	};
 	int option_index = 0;
 
 	// Scan argument
-	while ((c = getopt_long(argc, argv, "dv:1qr:w:s:R:C:c:g:xlfS",
+	while ((c = getopt_long(argc, argv, "dv:V1qr:w:s:R:C:c:g:xlfS",
 				long_options, &option_index)) != -1) {
 		switch (c) {
 		case 0:
@@ -858,6 +968,12 @@ int main(int argc, char *argv[])
 					}
 					break;
 				}
+
+				case FORCE_LONG_ARG_INDEX:
+					break;
+
+				case ASSUME_YES_LONG_ARG_INDEX:
+					break;
 
 				default:
 					fprintf(stderr, "Invalid long option index %d\n", option_index);
@@ -876,6 +992,10 @@ int main(int argc, char *argv[])
 			} else {
 				printf("No variable name\n");
 			}
+			break;
+
+		case 'V':
+			printVersion(progname);
 			break;
 
 		case '1':	// execute the command only once, not cyclic
@@ -1021,9 +1141,9 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'f':
-			rc = piControlUpdateFirmware(module_address);
+			rc = handleFirmwareUpdate(module_address, force_update, assume_yes, quiet);
 			if (rc) {
-				printf("piControlUpdateFirmware returned: %d (%s)\n", rc, strerror(-rc));
+				fprintf(stderr, "error when updating firmware: %s\n", strerror(-rc));
 				return rc;
 			}
 			break;
