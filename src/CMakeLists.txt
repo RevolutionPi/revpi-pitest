@@ -11,6 +11,11 @@ set(SOURCES
 add_executable(${TARGET} ${SOURCES})
 target_include_directories(${TARGET} PRIVATE ../include ../lib/piControl/src)
 
+# link pthread
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+target_link_libraries(${TARGET} PRIVATE Threads::Threads)
+
 install(TARGETS ${TARGET} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # install the symbolic link by first creating it in the binary directory and
