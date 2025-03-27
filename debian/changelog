@@ -1,3 +1,51 @@
+pitest (1.8.0-1+deb12+1) bookworm; urgency=medium
+
+  [ Thomas Böhler ]
+  * chore(deb): switch upstream to 1.x
+
+  [ Lino Sanfilippo ]
+  * chore: switch to latest piControl version
+  * build: correct cmake directories path
+  * feat: support command line parameter for forced update
+  * doc: Add description for the force parameter
+  * feat: provide command line option for version info
+  * doc: Add description for the Version parameter
+  * refactor: use tabs instead of spaces in piControlIf.c
+  * refactor: in piControlIf.h use correct SPDX Header
+  * refactor: get rid of obsolete code compiled with KUNBUS_TEST defined
+
+  [ Thomas Böhler ]
+  * fix: return proper error on piControlOpen
+  * doc: rewrite man page with scdoc
+  * doc: bundle examples under separate heading
+  * doc: add proper synopsis for piTest man page
+  * doc: add reference to picontrol_ioctl man page
+  * fix: avoid empty initializer braces in long_opts
+  * ci: build edge packages
+  * ci: add commit linting job
+  * doc: Update -f option for better readability
+  * doc: add optional force parameter to synopsis
+  * doc: reference man page in README.md
+  * doc: fix indentation of -V option in help output
+  * fix: don't fail on up to date firmware
+  * feat: show notice on successful firmware update
+  * fix: be consistent with firmware update messages
+  * doc: --module value must be greater than 0
+  * build: install moved picontrol_ioctl man page
+
+  [ Lino Sanfilippo ]
+  * fix: remove superfluous call of piShowLastMessage
+  * feat: add messages for firmware update
+
+  [ Thomas Böhler ]
+  * fix(fwupdate): require confirmation before update
+  * feat(fwupdate): add spinner
+  * feat(fwupdate): add -q for fwupdate
+  * build: link against libpthread
+  * fix(deb): add scdoc dependency
+
+ -- Ramiro Gsponer <r.gsponer@kunbus.com>  Thu, 27 Mar 2025 11:44:00 +0100
+
 pitest (1.7.0-1+deb12+1) bookworm; urgency=medium
 
   [ Ahmad Arabi Katbi ]
