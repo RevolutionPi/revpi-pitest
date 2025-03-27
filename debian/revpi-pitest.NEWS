@@ -1,0 +1,12 @@
+pitest (1.8.0-1+revpi11+1) bullseye; urgency=medium
+
+  The --force flag has been introduced to allow a firmware update even if the current firmware
+  version is equal to or older than the one running on the module.
+
+  A spinner has been added to provide visual feedback while a firmware update is in progress,
+  improving the user experience and making the process more intuitive.
+
+  The manual page has been updated to reflect the new features and options, with clearer
+  instructions on how to specify and update individual modules.
+
+ -- Ramiro Gsponer <r.gsponer@kunbus.com>  Thu, 27 Mar 2025 15:45:24 +0100
