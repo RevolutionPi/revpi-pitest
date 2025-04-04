@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 KUNBUS GmbH
+# SPDX-FileCopyrightText: 2023-2025 KUNBUS GmbH
 #
 # SPDX-License-Identifier: MIT
 
@@ -24,5 +24,6 @@ install(TARGETS ${TARGET} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 # `install(CODE...` doesn't respect the installation prefix.
 add_custom_target(piControlReset ALL
 	COMMAND ln -fs ${TARGET} ${CMAKE_CURRENT_BINARY_DIR}/piControlReset)
+add_dependencies(piControlReset ${TARGET})
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/piControlReset
 	DESTINATION ${CMAKE_INSTALL_BINDIR})
