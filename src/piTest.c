@@ -26,6 +26,7 @@
 
 #include "piControlIf.h"
 #include "piControl.h"
+#include "common_define.h"
 
 #define PROGRAM_VERSION		"1.8.0"
 
@@ -125,35 +126,35 @@ char *getWriteError(int error)
 char *getModuleName(uint16_t moduletype)
 {
 	switch (moduletype) {
-	case 95:
+	case KUNBUS_FW_DESCR_TYP_PI_CORE:
 		return "RevPi Core";
-	case 96:
+	case KUNBUS_FW_DESCR_TYP_PI_DIO_14:
 		return "RevPi DIO";
-	case 97:
+	case KUNBUS_FW_DESCR_TYP_PI_DI_16:
 		return "RevPi DI";
-	case 98:
+	case KUNBUS_FW_DESCR_TYP_PI_DO_16:
 		return "RevPi DO";
-	case 103:
+	case KUNBUS_FW_DESCR_TYP_PI_AIO:
 		return "RevPi AIO";
-	case 104:
+	case KUNBUS_FW_DESCR_TYP_PI_COMPACT:
 		return "RevPi Compact";
-	case 105:
+	case KUNBUS_FW_DESCR_TYP_PI_CONNECT:
 		return "RevPi Connect";
-	case 109:
+	case KUNBUS_FW_DESCR_TYP_PI_CON_CAN:
 		return "RevPi CON CAN";
-	case 110:
+	case KUNBUS_FW_DESCR_TYP_PI_CON_MBUS:
 		return "RevPi CON M-Bus";
-	case 111:
+	case KUNBUS_FW_DESCR_TYP_PI_CON_BT:
 		return "RevPi CON BT";
-	case 118:
+	case KUNBUS_FW_DESCR_TYP_PI_MIO:
 		return "RevPi MIO";
-	case 135:
+	case KUNBUS_FW_DESCR_TYP_PI_FLAT:
 		return "RevPi Flat";
-	case 136:
+	case KUNBUS_FW_DESCR_TYP_PI_CONNECT_4:
 		return "RevPi Connect 4";
-	case 137:
+	case KUNBUS_FW_DESCR_TYP_PI_RO:
 		return "RevPi RO";
-	case 138:
+	case KUNBUS_FW_DESCR_TYP_PI_CONNECT_5:
 		return "RevPi Connect 5";
 
 	case PICONTROL_SW_MODBUS_TCP_SLAVE:
@@ -179,37 +180,37 @@ char *getModuleName(uint16_t moduletype)
 	case PICONTROL_NOT_CONNECTED:
 		return "RevPi Virtual Device";
 
-	case 71:
+	case KUNBUS_FW_DESCR_TYP_MG_CAN_OPEN:
 		return "Gateway CANopen";
-	case 72:
+	case KUNBUS_FW_DESCR_TYP_MG_CCLINK:
 		return "Gateway CC-Link";
-	case 73:
+	case KUNBUS_FW_DESCR_TYP_MG_DEV_NET:
 		return "Gateway DeviceNet";
-	case 74:
+	case KUNBUS_FW_DESCR_TYP_MG_ETHERCAT:
 		return "Gateway EtherCAT";
-	case 75:
+	case KUNBUS_FW_DESCR_TYP_MG_ETHERNET_IP:
 		return "Gateway EtherNet/IP";
-	case 76:
+	case KUNBUS_FW_DESCR_TYP_MG_POWERLINK:
 		return "Gateway Powerlink";
-	case 77:
+	case KUNBUS_FW_DESCR_TYP_MG_PROFIBUS:
 		return "Gateway Profibus";
-	case 78:
+	case KUNBUS_FW_DESCR_TYP_MG_PROFINET_RT:
 		return "Gateway Profinet RT";
-	case 79:
+	case KUNBUS_FW_DESCR_TYP_MG_PROFINET_IRT:
 		return "Gateway Profinet IRT";
-	case 80:
+	case KUNBUS_FW_DESCR_TYP_MG_CAN_OPEN_MASTER:
 		return "Gateway CANopen Master";
-	case 81:
+	case KUNBUS_FW_DESCR_TYP_MG_SERCOS3:
 		return "Gateway SercosIII";
-	case 82:
+	case KUNBUS_FW_DESCR_TYP_MG_SERIAL:
 		return "Gateway Serial";
-	case 85:
+	case KUNBUS_FW_DESCR_TYP_MG_ETHERCAT_MASTER:
 		return "Gateway EtherCAT Master";
-	case 92:
+	case KUNBUS_FW_DESCR_TYP_MG_MODBUS_RTU:
 		return "Gateway ModbusRTU";
-	case 93:
+	case KUNBUS_FW_DESCR_TYP_MG_MODBUS_TCP:
 		return "Gateway ModbusTCP";
-	case 100:
+	case KUNBUS_FW_DESCR_TYP_MG_DMX:
 		return "Gateway DMX";
 
 	default:
