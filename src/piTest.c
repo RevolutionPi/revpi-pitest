@@ -172,6 +172,12 @@ char *getModuleName(uint16_t moduletype)
 		return "RevPi7 Adapter";
 	case PICONTROL_SW_REVPI_CLOUD:
 		return "RevPi Cloud Adapter";
+	case PICONTROL_SW_OPCUA_REVPI_SERVER:
+		return "RevPi OPCUA Server";
+	case PICONTROL_SW_MQTT_REVPI_CLIENT:
+		return "RevPi MQTT Client";
+	case PICONTROL_NOT_CONNECTED:
+		return "RevPi Virtual Device";
 
 	case 71:
 		return "Gateway CANopen";
