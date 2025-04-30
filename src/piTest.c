@@ -228,9 +228,10 @@ char *getModuleName(uint16_t moduletype)
  ************************************************************************************/
 int showDeviceList(void)
 {
+	SDeviceInfo asDevList[REV_PI_DEV_CNT_MAX];
+	SDeviceInfo *devinfo;
 	int devcount;
 	int dev;
-	SDeviceInfo asDevList[REV_PI_DEV_CNT_MAX];
 
 	// Get device info
 	devcount = piControlGetDeviceInfoList(asDevList);
@@ -241,16 +242,18 @@ int showDeviceList(void)
 	printf("Found %d devices:\n\n", devcount);
 
 	for (dev = 0; dev < devcount; dev++) {
-		// Show device number, address and module type
-		printf("Address: %d module type: %d (0x%x) %s V%d.%d\n", asDevList[dev].i8uAddress,
-		       asDevList[dev].i16uModuleType, asDevList[dev].i16uModuleType,
-		       getModuleName(asDevList[dev].i16uModuleType & PICONTROL_NOT_CONNECTED_MASK),
-		       asDevList[dev].i16uSW_Major, asDevList[dev].i16uSW_Minor);
+		devinfo = &asDevList[dev];
 
-		if (asDevList[dev].i8uActive) {
+		// Show device number, address and module type
+		printf("Address: %d module type: %d (0x%x) %s V%d.%d\n", devinfo->i8uAddress,
+		       devinfo->i16uModuleType, devinfo->i16uModuleType,
+		       getModuleName(devinfo->i16uModuleType & PICONTROL_NOT_CONNECTED_MASK),
+		       devinfo->i16uSW_Major, devinfo->i16uSW_Minor);
+
+		if (devinfo->i8uActive) {
 			printf("Module is present\n");
 		} else {
-			if (asDevList[dev].i16uModuleType & PICONTROL_NOT_CONNECTED) {
+			if (devinfo->i16uModuleType & PICONTROL_NOT_CONNECTED) {
 				printf("Module is NOT present, data is NOT available!!!\n");
 			} else {
 				printf("Module is present, but NOT CONFIGURED!!!\n");
@@ -258,12 +261,12 @@ int showDeviceList(void)
 		}
 
 		// Show offset and length of input section in process image
-		printf("     input offset: %d length: %d\n", asDevList[dev].i16uInputOffset,
-		       asDevList[dev].i16uInputLength);
+		printf("     input offset: %d length: %d\n", devinfo->i16uInputOffset,
+		       devinfo->i16uInputLength);
 
 		// Show offset and length of output section in process image
-		printf("    output offset: %d length: %d\n", asDevList[dev].i16uOutputOffset,
-		       asDevList[dev].i16uOutputLength);
+		printf("    output offset: %d length: %d\n", devinfo->i16uOutputOffset,
+		       devinfo->i16uOutputLength);
 		printf("\n");
 	}
 
