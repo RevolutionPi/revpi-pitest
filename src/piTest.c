@@ -230,6 +230,7 @@ void showDeviceList(void)
 {
 	SDeviceInfo asDevList[REV_PI_DEV_CNT_MAX];
 	SDeviceInfo *devinfo;
+	int moduletype;
 	int devcount;
 	int dev;
 
@@ -244,12 +245,16 @@ void showDeviceList(void)
 
 	for (dev = 0; dev < devcount; dev++) {
 		devinfo = &asDevList[dev];
+		moduletype = devinfo->i16uModuleType;
+
+		if (!devinfo->i8uActive)
+			moduletype &= PICONTROL_NOT_CONNECTED_MASK;
 
 		// Show device number, address and module type
-		printf("Address: %d module type: %d (0x%x) %s V%d.%d\n", devinfo->i8uAddress,
-		       devinfo->i16uModuleType, devinfo->i16uModuleType,
-		       getModuleName(devinfo->i16uModuleType & PICONTROL_NOT_CONNECTED_MASK),
-		       devinfo->i16uSW_Major, devinfo->i16uSW_Minor);
+		printf("Address: %d module type: %d (0x%x) %s V%d.%d\n",
+			devinfo->i8uAddress, devinfo->i16uModuleType,
+			devinfo->i16uModuleType, getModuleName(moduletype),
+			devinfo->i16uSW_Major, devinfo->i16uSW_Minor);
 
 		if (devinfo->i8uActive) {
 			printf("Module is present\n");
