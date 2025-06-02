@@ -1,3 +1,11 @@
+pitest (1.8.1-1+deb12+1) bookworm; urgency=medium
+
+  Updated picontrol to version 2.3.6.
+
+  Fixed an issue where the names of some virtual devices were displayed incorrectly. 
+
+ -- Ramiro Gsponer <r.gsponer@kunbus.com>  Mon, 02 Jun 2025 12:11:12 +0200
+
 pitest (1.8.0-1+deb12+1) bookworm; urgency=medium
 
   The --force flag has been introduced to allow a firmware update even if the current firmware
