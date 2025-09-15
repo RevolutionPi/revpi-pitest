@@ -831,7 +831,6 @@ static int handleFirmwareUpdate(int module_address, int force_update, int assume
 
 	rc = piControlUpdateFirmware(module_address, force_update);
 	if (rc != 0) {
-		fprintf(stderr, "failed to update firmware: %s\n", strerror(-rc));
 		ret = rc;
 		goto cleanupSpinnerThread;
 	}
@@ -1256,7 +1255,6 @@ int main(int argc, char *argv[])
 		case 'f':
 			rc = handleFirmwareUpdate(module_address, force_update, assume_yes, quiet);
 			if (rc) {
-				fprintf(stderr, "error when updating firmware: %s\n", strerror(-rc));
 				return rc;
 			}
 			break;
