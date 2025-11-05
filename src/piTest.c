@@ -37,11 +37,13 @@
 # define MODULE_LONG_ARG_NAME "module"
 # define FORCE_LONG_ARG_NAME "force"
 # define ASSUME_YES_LONG_ARG_NAME "assume-yes"
+# define RESCUE_LONG_ARG_NAME "rescue"
 
 /* long option indices */
 # define MODULE_LONG_ARG_INDEX 0
 # define FORCE_LONG_ARG_INDEX  1
 # define ASSUME_YES_LONG_ARG_INDEX 2
+# define RESCUE_LONG_ARG_INDEX 3
 
 /***********************************************************************************/
 /*!
@@ -751,7 +753,8 @@ static void *spinner_thread_start(void *arg)
 	}
 }
 
-static int handleFirmwareUpdate(int module_address, int force_update, int assume_yes, bool quiet)
+static int handleFirmwareUpdate(int module_address, int force_update,
+				int hw_revision, int assume_yes, bool quiet)
 {
 	int rc;
 	int ret = 0;
@@ -787,7 +790,7 @@ static int handleFirmwareUpdate(int module_address, int force_update, int assume
 		}
 	}
 
-	rc = piControlUpdateFirmware(module_address, force_update);
+	rc = piControlUpdateFirmware(module_address, force_update, hw_revision);
 	if (rc != 0) {
 		ret = rc;
 		goto cleanupSpinnerThread;
@@ -931,6 +934,7 @@ int main(int argc, char *argv[])
 	// `-f` option the default value of `0` is used, which will automatically
 	// choose which module to update.
 	unsigned int module_address = 0;
+	int module_hw_revision = -1;
 	int assume_yes = 0;
 	char szVariableName[256];
 	char *pszTok, *progname;
@@ -960,6 +964,7 @@ int main(int argc, char *argv[])
 		[MODULE_LONG_ARG_INDEX] = { MODULE_LONG_ARG_NAME, required_argument, NULL, 0 },
 		[FORCE_LONG_ARG_INDEX] = { FORCE_LONG_ARG_NAME, no_argument, &force_update, 1 },
 		[ASSUME_YES_LONG_ARG_INDEX] = { ASSUME_YES_LONG_ARG_NAME, no_argument, &assume_yes, 1 },
+		[RESCUE_LONG_ARG_INDEX] = { RESCUE_LONG_ARG_NAME, required_argument, NULL, 0 },
 		{0, 0, 0, 0}
 	};
 	int option_index = 0;
@@ -988,6 +993,25 @@ int main(int argc, char *argv[])
 
 				case ASSUME_YES_LONG_ARG_INDEX:
 					break;
+
+				case RESCUE_LONG_ARG_INDEX:
+				{
+					char *endptr = NULL;
+
+					module_hw_revision = strtoul(optarg, &endptr, 0);
+
+					if (endptr == optarg) {
+						fprintf(stderr, "Invalid argument '%s' to option '%s'\n", optarg,
+							long_options[option_index].name);
+						return 1;
+					}
+					if (module_hw_revision < 0) {
+						fprintf(stderr,
+							"The hardware revision of a module must not be negative\n");
+						return 1;
+					}
+					break;
+				}
 
 				default:
 					fprintf(stderr, "Invalid long option index %d\n", option_index);
@@ -1155,7 +1179,9 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'f':
-			rc = handleFirmwareUpdate(module_address, force_update, assume_yes, quiet);
+			rc = handleFirmwareUpdate(module_address, force_update,
+						  module_hw_revision,
+						  assume_yes, quiet);
 			if (rc) {
 				return rc;
 			}
