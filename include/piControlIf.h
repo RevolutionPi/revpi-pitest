@@ -40,7 +40,8 @@ int piControlFindVariable(const char *name);
 int piControlResetCounter(int address, int bitfield);
 int piControlGetROCounters(int address);
 int piControlWaitForEvent(void);
-int piControlUpdateFirmware(uint32_t addr_p, bool force_update);
+int piControlUpdateFirmware(uint32_t addr_p, bool force_update,
+			    int hw_revision);
 int piControlStopIO(int stop);
 void piShowLastMessage(void);
 int piControlCalibrate(int addr, int channl, int mode, int xval, int yval);

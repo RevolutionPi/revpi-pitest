@@ -442,7 +442,7 @@ int piControlGetROCounters(int address)
  * @return 0 or error if negative
  *
  ************************************************************************************/
-int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
+int piControlUpdateFirmware(uint32_t addr_p, bool force_update, int hw_revision)
 {
 	struct picontrol_firmware_upload fwu;
 	int ret;
@@ -462,6 +462,12 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 	fwu.addr = addr_p;
 	if (force_update) {
 		fwu.flags |= PICONTROL_FIRMWARE_FORCE_UPLOAD;
+	}
+	if (hw_revision >= 0) {
+		fwu.flags |= PICONTROL_FIRMWARE_RESCUE_MODE;
+		fwu.rescue_mode_hw_revision = hw_revision;
+		printf("Using firmware rescue mode with hw revision %u\n",
+			hw_revision);
 	}
 
 	printf("Updating Firmware%s!\n", force_update ? " (forced)" : "");
