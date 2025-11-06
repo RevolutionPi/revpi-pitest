@@ -45,76 +45,6 @@
 
 /***********************************************************************************/
 /*!
- * @brief Get message text for read error
- *
- * Get the message text for an error on read from control process.
- *
- * @param[in]   Error number.
- *
- * @return Pointer to the error message
- *
- ************************************************************************************/
-char *getReadError(int error)
-{
-	static char *ReadError[] = {
-		"Cannot connect to control process",
-		"Offset seek error",
-		"Cannot read from control process",
-		"Unknown error"
-	};
-	switch (error) {
-	case -1:
-		return ReadError[0];
-		break;
-	case -2:
-		return ReadError[1];
-		break;
-	case -3:
-		return ReadError[2];
-		break;
-	default:
-		return ReadError[3];
-		break;
-	}
-}
-
-/***********************************************************************************/
-/*!
- * @brief Get message text for write error
- *
- * Get the message text for an error on write to control process.
- *
- * @param[in]   Error number.
- *
- * @return Pointer to the error message
- *
- ************************************************************************************/
-char *getWriteError(int error)
-{
-	static char *WriteError[] = {
-		"Cannot connect to control process",
-		"Offset seek error",
-		"Cannot write to control process",
-		"Unknown error"
-	};
-	switch (error) {
-	case -1:
-		return WriteError[0];
-		break;
-	case -2:
-		return WriteError[1];
-		break;
-	case -3:
-		return WriteError[2];
-		break;
-	default:
-		return WriteError[3];
-		break;
-	}
-}
-
-/***********************************************************************************/
-/*!
  * @brief Get module type as string
  *
  *
@@ -312,7 +242,6 @@ int readData(uint16_t offset, uint16_t length, bool cyclic, char format, bool qu
 		rc = piControlRead(offset, length, pValues);
 		if (rc < 0) {
 			if (!quiet) {
-				fprintf(stderr, "read error %s\n", getReadError(rc));
 				if (!cyclic)
 					return rc;
 			}
@@ -580,13 +509,11 @@ int writeData(int offset, int length, unsigned long i32uValue)
 		return -EINVAL;
 	}
 	rc = piControlWrite(offset, length, (uint8_t *) & i32uValue);
-	if (rc < 0) {
-		fprintf(stderr, "write error %s\n", getWriteError(rc));
+	if (rc < 0)
 		return rc;
-	} else {
-		printf("Write value %lx hex (=%ld dez) to offset %d.\n", i32uValue, i32uValue, offset);
-		return 0;
-	}
+
+	printf("Write value %lx hex (=%ld dez) to offset %d.\n", i32uValue, i32uValue, offset);
+	return 0;
 }
 
 /***********************************************************************************/
@@ -620,7 +547,7 @@ int writeVariableValue(char *pszVariableName, uint32_t i32uValue)
 		sPIValue.i8uValue = i32uValue;
 		rc = piControlSetBitValue(&sPIValue);
 		if (rc < 0) {
-			fprintf(stderr, "Set bit error %s\n", getWriteError(rc));
+			fprintf(stderr, "Error setting bit value\n");
 			return rc;
 		} else
 			printf("Set bit %d on byte at offset %d. Value %d\n", sPIValue.i8uBit, sPIValue.i16uAddress,
@@ -629,7 +556,7 @@ int writeVariableValue(char *pszVariableName, uint32_t i32uValue)
 		i8uValue = i32uValue;
 		rc = piControlWrite(sPiVariable.i16uAddress, 1, (uint8_t *) & i8uValue);
 		if (rc < 0) {
-			fprintf(stderr, "Write error %s\n", getWriteError(rc));
+			fprintf(stderr, "Error writing variable address\n");
 			return rc;
 		} else
 			printf("Write value %d dez (=%02x hex) to offset %d.\n", i8uValue, i8uValue,
@@ -638,7 +565,7 @@ int writeVariableValue(char *pszVariableName, uint32_t i32uValue)
 		i16uValue = i32uValue;
 		rc = piControlWrite(sPiVariable.i16uAddress, 2, (uint8_t *) & i16uValue);
 		if (rc < 0) {
-			fprintf(stderr, "Write error %s\n", getWriteError(rc));
+			fprintf(stderr, "Error writing variable address\n");
 			return rc;
 		} else
 			printf("Write value %d dez (=%04x hex) to offset %d.\n", i16uValue, i16uValue,
@@ -646,7 +573,7 @@ int writeVariableValue(char *pszVariableName, uint32_t i32uValue)
 	} else if (sPiVariable.i16uLength == 32) {
 		rc = piControlWrite(sPiVariable.i16uAddress, 4, (uint8_t *) & i32uValue);
 		if (rc < 0) {
-			fprintf(stderr, "Write error %s\n", getWriteError(rc));
+			fprintf(stderr, "Error writing variable address\n");
 			return rc;
 		} else
 			printf("Write value %d dez (=%08x hex) to offset %d.\n", i32uValue, i32uValue,
@@ -688,13 +615,8 @@ int setBit(int offset, int bit, int value)
 	sPIValue.i8uValue = value;
 	// Set bit
 	rc = piControlSetBitValue(&sPIValue);
-	if (rc < 0) {
-		fprintf(stderr, "Set bit error %s\n", getWriteError(rc));
+	if (rc < 0)
 		return rc;
-	} else {
-		printf("Set bit %d on byte at offset %d. Value %d\n", bit, offset, value);
-	}
-
 	return 0;
 }
 
@@ -1155,6 +1077,7 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "Failed to set bit\n");
 				return 1;
 			}
+			printf("Set bit %d on byte at offset %d. Value %d\n", bit, offset, value);
 			return 0;
 			break;
 
