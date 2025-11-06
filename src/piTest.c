@@ -974,7 +974,8 @@ int main(int argc, char *argv[])
 
 		case 'v':
 			if (strlen(optarg) > 0) {
-				showVariableInfo(optarg);
+				if (showVariableInfo(optarg))
+					return 1;
 			} else {
 				fprintf(stderr, "No variable name\n");
 				return 1;
