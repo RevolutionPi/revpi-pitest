@@ -357,41 +357,6 @@ int piControlGetVariableInfo(SPIVariable * pSpiVariable)
 
 /***********************************************************************************/
 /*!
- * @brief Get Variable offset by name
- *
- * Get the offset of a variable in the process image. This does NOT work for variable of type bool.
- *
- * @param[in]   pointer to string with name of variable
- *
- * @return      >= 0    offset
-                < 0     in case of error
- *
- ************************************************************************************/
-int piControlFindVariable(const char *name)
-{
-	SPIVariable var;
-	int ret;
-
-	ret = piControlOpen();
-	if (ret < 0)
-		return ret;
-
-	strncpy(var.strVarName, name, sizeof(var.strVarName));
-	var.strVarName[sizeof(var.strVarName) - 1] = 0;
-
-	ret = ioctl(PiControlHandle_g, KB_FIND_VARIABLE, &var);
-	if (ret < 0) {
-		//printf("could not find variable '%s' in configuration.\n", var.strVarName);
-		ret = -1;
-	} else {
-		//printf("Variable '%s' is at offset %d and %d bits long\n", var.strVarName, var.i16uAddress, var.i16uLength);
-		ret = var.i16uAddress;
-	}
-	return ret;
-}
-
-/***********************************************************************************/
-/*!
  * @brief Reset a counter or encoder in a RevPi DI or DIO module
  *
  * The DIO and DI modules some of the inputs can be configured as counter or encoder.
