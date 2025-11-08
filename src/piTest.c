@@ -502,7 +502,7 @@ int readVariableValue(char *pszVariableName, bool cyclic, char format, bool quie
  * @param[in]   Value to write
  *
  ************************************************************************************/
-int writeData(int offset, int length, unsigned long i32uValue)
+int writeData(int offset, int length, unsigned int i32uValue)
 {
 	int rc;
 
@@ -514,7 +514,7 @@ int writeData(int offset, int length, unsigned long i32uValue)
 	if (rc < 0)
 		return rc;
 
-	printf("Write value %lx hex (=%ld dez) to offset %d.\n", i32uValue, i32uValue, offset);
+	printf("Write value %x hex (=%d dez) to offset %d.\n", i32uValue, i32uValue, offset);
 	return 0;
 }
 
@@ -1061,9 +1061,9 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'w':
-			rc = sscanf(optarg, "%d,%d,%lu", &offset, &length, &value);
+			rc = sscanf(optarg, "%d,%d,%u", &offset, &length, &val);
 			if (rc == 3) {
-				rc = writeData(offset, length, value);
+				rc = writeData(offset, length, val);
 				if (rc < 0) {
 					fprintf(stderr, "Failed to write data\n");
 					return 1;
@@ -1091,18 +1091,18 @@ int main(int argc, char *argv[])
 			break;
 
 		case 's':
-			rc = sscanf(optarg, "%d,%d,%lu", &offset, &bit, &value);
+			rc = sscanf(optarg, "%d,%d,%u", &offset, &bit, &val);
 			if (rc != 3) {
 				fprintf(stderr, "Wrong arguments for set bit function\n");
 				fprintf(stderr, "Try '-s offset,bit,value' (without spaces)\n");
 				return 1;
 			}
-			rc = setBit(offset, bit, value);
+			rc = setBit(offset, bit, val);
 			if (rc < 0) {
 				fprintf(stderr, "Failed to set bit\n");
 				return 1;
 			}
-			printf("Set bit %d on byte at offset %d. Value %d\n", bit, offset, value);
+			printf("Set bit %d on byte at offset %d. Value %d\n", bit, offset, val);
 			return 0;
 			break;
 
