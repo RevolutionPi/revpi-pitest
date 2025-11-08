@@ -1074,7 +1074,7 @@ int main(int argc, char *argv[])
 			break;
 
 		case 'w':
-			rc = sscanf(optarg, "%d,%d,%lu", &offset, &length, &value);
+			rc = sscanf(optarg, "%d,%d,%u", &offset, &length, &val);
 			if (rc == 3) {
 				writeData(offset, length, value);
 				return 0;
@@ -1095,7 +1095,7 @@ int main(int argc, char *argv[])
 			break;
 
 		case 's':
-			rc = sscanf(optarg, "%d,%d,%lu", &offset, &bit, &value);
+			rc = sscanf(optarg, "%d,%d,%u", &offset, &bit, &val);
 			if (rc != 3) {
 				printf("Wrong arguments for set bit function\n");
 				printf("Try '-s offset,bit,value' (without spaces)\n");
