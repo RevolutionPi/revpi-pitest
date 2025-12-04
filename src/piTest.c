@@ -28,7 +28,7 @@
 #include "piControl.h"
 #include "common_define.h"
 
-#define PROGRAM_VERSION		"2.0.0"
+#define PROGRAM_VERSION		"2.1.0"
 
 #define SEC_AS_USEC 1000000
 #define NUM_SPINS_PER_SECOND 16
