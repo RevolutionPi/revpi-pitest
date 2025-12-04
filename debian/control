@@ -5,12 +5,12 @@ Maintainer: KUNBUS GmbH <support@kunbus.com>
 Rules-Requires-Root: no
 Homepage: https://revolutionpi.com/
 Vcs-Browser: https://gitlab.com/revolutionpi/revpi-pitest
-Vcs-Git: https://gitlab.com/revolutionpi/revpi-pitest.git -b debian/bookworm
+Vcs-Git: https://gitlab.com/revolutionpi/revpi-pitest.git -b debian/trixie
 Build-Depends:
   cmake,
   debhelper-compat (= 13),
   scdoc,
-Standards-Version: 4.6.2
+Standards-Version: 4.7.2
 
 Package: pitest
 Architecture: any
