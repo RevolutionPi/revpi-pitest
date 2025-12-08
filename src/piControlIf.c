@@ -326,40 +326,6 @@ int piControlGetVariableInfo(SPIVariable * pSpiVariable)
 
 /***********************************************************************************/
 /*!
- * @brief Get Variable offset by name
- *
- * Get the offset of a variable in the process image. This does NOT work for variable of type bool.
- *
- * @param[in]   pointer to string with name of variable
- *
- * @return      >= 0    offset
-                < 0     in case of error
- *
- ************************************************************************************/
-int piControlFindVariable(const char *name)
-{
-	SPIVariable var;
-	int ret;
-
-	ret = piControlOpen();
-	if (ret < 0)
-		return ret;
-
-	strncpy(var.strVarName, name, sizeof(var.strVarName));
-	var.strVarName[sizeof(var.strVarName) - 1] = 0;
-
-	ret = ioctl(PiControlHandle_g, KB_FIND_VARIABLE, &var);
-	if (ret < 0) {
-                //printf("could not find variable '%s' in configuration.\n", var.strVarName);
-	} else {
-		//printf("Variable '%s' is at offset %d and %d bits long\n", var.strVarName, var.i16uAddress, var.i16uLength);
-		ret = var.i16uAddress;
-	}
-	return ret;
-}
-
-/***********************************************************************************/
-/*!
  * @brief Reset a counter or encoder in a RevPi DI or DIO module
  *
  * The DIO and DI modules some of the inputs can be configured as counter or encoder.
@@ -444,7 +410,7 @@ int piControlGetROCounters(int address)
  * @return 0 or error if negative
  *
  ************************************************************************************/
-int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
+int piControlUpdateFirmware(uint32_t addr_p, bool force_update, int hw_revision)
 {
 	int ret;
 
@@ -477,6 +443,12 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update)
 
 		if (force_update)
 			fwu.flags |= PICONTROL_FIRMWARE_FORCE_UPLOAD;
+		if (hw_revision >= 0) {
+			fwu.flags |= PICONTROL_FIRMWARE_RESCUE_MODE;
+			fwu.rescue_mode_hw_revision = hw_revision;
+			printf("Using firmware rescue mode with hw revision %u\n",
+				hw_revision);
+		}
 
 		ret = ioctl(PiControlHandle_g, PICONTROL_UPLOAD_FIRMWARE, &fwu);
 		if (ret < 0) {
