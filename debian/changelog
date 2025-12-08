@@ -1,3 +1,19 @@
+pitest (1.9.0-1+deb12+1) bookworm; urgency=medium
+
+  [ Nicolai Buchwitz ]
+  * feat: Remove redundant error messages in fw update
+
+  [ Lino Sanfilippo ]
+  * fix: remove unused function piControlFindVariable
+  * chore: switch to piControl v2.4.0
+  * feat: Support firmware rescue mode
+  * fix: correct parameter of function writeData
+
+  [ Thomas Böhler ]
+  * chore: release v1.9.0
+
+ -- Thomas Böhler <t.boehler@kunbus.com>  Mon, 08 Dec 2025 07:01:53 +0100
+
 pitest (1.8.1-1+deb12+1) bookworm; urgency=medium
 
   [ Ramiro Gsponer ]
