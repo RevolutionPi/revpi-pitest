@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2017-2023 KUNBUS GmbH
+// SPDX-FileCopyrightText: 2017-2024 KUNBUS GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -25,6 +25,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "piControlIf.h"
 
@@ -93,8 +94,10 @@ int piControlReset(void)
 	if (ret < 0)
 		return ret;
 
-	if (ioctl(PiControlHandle_g, KB_RESET, NULL) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_RESET, NULL) < 0) {
+		fprintf(stderr, "Failed to reset piControl: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -115,8 +118,10 @@ int piControlWaitForEvent(void)
 	if (ret < 0)
 		return ret;
 
-	if (ioctl(PiControlHandle_g, KB_WAIT_FOR_EVENT, &event) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_WAIT_FOR_EVENT, &event) < 0) {
+		fprintf(stderr, "Failed to wait for event: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return event;
 }
@@ -144,12 +149,22 @@ int piControlRead(uint32_t Offset, uint32_t Length, uint8_t * pData)
 		return ret;
 
 	/* seek */
-	if (lseek(PiControlHandle_g, Offset, SEEK_SET) < 0)
-		return -errno;
+	if (lseek(PiControlHandle_g, Offset, SEEK_SET) < 0) {
+		fprintf(stderr,
+			"Failed to seek to data at offset %" PRIu32 ": %s\n",
+			Offset, strerror(errno));
+		return -1;
+	}
+
 	/* read */
 	BytesRead = read(PiControlHandle_g, pData, Length);
-	if (BytesRead < 0)
-		return -errno;
+	if (BytesRead < 0) {
+		fprintf(stderr,
+			"Failed to read data at offset %" PRIu32
+			" with length %" PRIu32 ": %s\n",
+			Offset, Length, strerror(errno));
+		return -1;
+	}
 
 	return BytesRead;
 }
@@ -177,13 +192,22 @@ int piControlWrite(uint32_t Offset, uint32_t Length, uint8_t * pData)
 		return ret;
 
 	/* seek */
-	if (lseek(PiControlHandle_g, Offset, SEEK_SET) < 0)
-		return -errno;
+	if (lseek(PiControlHandle_g, Offset, SEEK_SET) < 0) {
+		fprintf(stderr,
+			"Failed to seek to data at offset %" PRIu32 ": %s\n",
+			Offset, strerror(errno));
+		return -1;
+	}
 
-        /* Write */
+	/* Write */
 	BytesWritten = write(PiControlHandle_g, pData, Length);
-	if (BytesWritten < 0)
-		return -errno;
+	if (BytesWritten < 0) {
+		fprintf(stderr,
+			"Failed to write data at offset %" PRIu32
+			" with length %" PRIu32 ": %s\n",
+			Offset, Length, strerror(errno));
+		return -1;
+	}
 
 	return BytesWritten;
 }
@@ -207,8 +231,10 @@ int piControlGetDeviceInfo(SDeviceInfo * pDev)
 	if (ret < 0)
 		return ret;
 
-	if (ioctl(PiControlHandle_g, KB_GET_DEVICE_INFO, pDev) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_GET_DEVICE_INFO, pDev) < 0) {
+		fprintf(stderr, "Failed to get device info: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -233,12 +259,11 @@ int piControlGetDeviceInfoList(SDeviceInfo * pDev)
 	if (ret < 0)
 		return ret;
 
-	if (PiControlHandle_g < 0)
-		return -ENODEV;
-
 	cnt = ioctl(PiControlHandle_g, KB_GET_DEVICE_INFO_LIST, pDev);
-	if (cnt < 0)
-		return -errno;
+	if (cnt < 0) {
+		fprintf(stderr, "Failed to get device info list: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return cnt;
 }
@@ -265,8 +290,10 @@ int piControlGetBitValue(SPIValue * pSpiValue)
 	pSpiValue->i16uAddress += pSpiValue->i8uBit / 8;
 	pSpiValue->i8uBit %= 8;
 
-	if (ioctl(PiControlHandle_g, KB_GET_VALUE, pSpiValue) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_GET_VALUE, pSpiValue) < 0) {
+		fprintf(stderr, "Failed to get bit value: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -293,8 +320,10 @@ int piControlSetBitValue(SPIValue * pSpiValue)
 	pSpiValue->i16uAddress += pSpiValue->i8uBit / 8;
 	pSpiValue->i8uBit %= 8;
 
-	if (ioctl(PiControlHandle_g, KB_SET_VALUE, pSpiValue) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_SET_VALUE, pSpiValue) < 0) {
+		fprintf(stderr, "Failed to set bit value: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -318,8 +347,10 @@ int piControlGetVariableInfo(SPIVariable * pSpiVariable)
 	if (ret < 0)
 		return ret;
 
-	if (ioctl(PiControlHandle_g, KB_FIND_VARIABLE, pSpiVariable) < 0)
-		return -errno;
+	if (ioctl(PiControlHandle_g, KB_FIND_VARIABLE, pSpiVariable) < 0) {
+		fprintf(stderr, "Failed to get variable info: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }
@@ -356,9 +387,10 @@ int piControlResetCounter(int address, int bitfield)
 	tel.i16uBitfield = bitfield;
 
 	ret = ioctl(PiControlHandle_g, KB_DIO_RESET_COUNTER, &tel);
-	if (ret < 0)
-		perror("Counter reset not possible");
-
+	if (ret < 0) {
+		fprintf(stderr, "Failed to reset counter: %s\n", strerror(errno));
+		return -1;
+	}
 	return ret;
 }
 
@@ -376,8 +408,8 @@ int piControlGetROCounters(int address)
 
 	ret = ioctl(PiControlHandle_g, KB_RO_GET_COUNTER, &ioc);
 	if (ret < 0) {
-		perror("Failed to get RO counters");
-		return ret;
+		fprintf(stderr, "Failed to get RO counters: %s\n", strerror(errno));
+		return -1;
 	}
 
 	printf("RO relay counters:\n");
@@ -412,61 +444,48 @@ int piControlGetROCounters(int address)
  ************************************************************************************/
 int piControlUpdateFirmware(uint32_t addr_p, bool force_update, int hw_revision)
 {
+	struct picontrol_firmware_upload fwu;
 	int ret;
+
+	if (addr_p == 0) {
+		fprintf(stderr,
+			"A firmware update on the module with address %" PRIu32
+			" (i.e. the Revolution Pi) is invalid.\n", addr_p);
+		return -EINVAL;
+	}
 
 	ret = piControlOpen();
 	if (ret < 0)
 		return ret;
 
+	memset(&fwu, 0, sizeof(fwu));
+	fwu.addr = addr_p;
+	if (force_update) {
+		fwu.flags |= PICONTROL_FIRMWARE_FORCE_UPLOAD;
+	}
+	if (hw_revision >= 0) {
+		fwu.flags |= PICONTROL_FIRMWARE_RESCUE_MODE;
+		fwu.rescue_mode_hw_revision = hw_revision;
+		printf("Using firmware rescue mode with hw revision %u\n",
+			hw_revision);
+	}
+
 	printf("Updating Firmware%s!\n", force_update ? " (forced)" : "");
 	printf("This can take a while. Do not switch off the system!\n");
 
-	if (!addr_p) { /* only supported with legacy ioctl */
-		if (force_update) {
-			fprintf(stderr,
-				"Error: no module address given for forced firmware update.\n");
-			return -EINVAL;
-		}
-		ret = ioctl(PiControlHandle_g, KB_UPDATE_DEVICE_FIRMWARE, NULL);
-		if (ret < 0) {
-			fprintf(stderr, "Failed to update firmware of module with address %"
-				PRIu32 ": %s\n", addr_p, strerror(errno));
-			return -1;
-		} else {
-			printf("Firmware updated successfully.\n");
-		}
-	} else {
-		struct picontrol_firmware_upload fwu;
-
-		memset(&fwu, 0, sizeof(fwu));
-		fwu.addr = addr_p;
-
-		if (force_update)
-			fwu.flags |= PICONTROL_FIRMWARE_FORCE_UPLOAD;
-		if (hw_revision >= 0) {
-			fwu.flags |= PICONTROL_FIRMWARE_RESCUE_MODE;
-			fwu.rescue_mode_hw_revision = hw_revision;
-			printf("Using firmware rescue mode with hw revision %u\n",
-				hw_revision);
-		}
-
-		ret = ioctl(PiControlHandle_g, PICONTROL_UPLOAD_FIRMWARE, &fwu);
-		if (ret < 0) {
-			fprintf(stderr, "Failed to update firmware of module with address %"
-				PRIu32 ": %s\n", addr_p, strerror(errno));
-			return -1;
-		} else if (ret == 0) {
-			printf("Firmware for module with address %" PRIu32
-				" updated successfully.\n", addr_p);
-		} else if (ret == 1) {
-			printf("Firmware of module with address %" PRIu32
-				" is already up to date.\n", addr_p);
-			printf("Use '--force' to force firmware update.\n");
-		}
+	ret = ioctl(PiControlHandle_g, PICONTROL_UPLOAD_FIRMWARE, &fwu);
+	if (ret < 0) {
+		fprintf(stderr, "Failed to update firmware of module with address %"
+			PRIu32 ": %s\n", addr_p, strerror(errno));
+		return -1;
+	} else if (ret == 0) {
+		printf("Firmware for module with address %" PRIu32
+			" updated successfully.\n", addr_p);
+	} else if (ret == 1) {
+		printf("Firmware of module with address %" PRIu32
+			" is already up to date.\n", addr_p);
+		printf("Use '--force' to force firmware update.\n");
 	}
-
-	if (ret)
-		return -errno;
 
 	return 0;
 }
@@ -502,9 +521,10 @@ int piControlStopIO(int stop)
 		return ret;
 
 	ret = ioctl(PiControlHandle_g, KB_STOP_IO, &stop);
-	if (ret < 0)
-		perror("ioctl(KB_STOP_IO) returned error");
-
+	if (ret < 0) {
+		fprintf(stderr, "Failed to stop IO: %s\n", strerror(errno));
+		return -1;
+	}
 	return ret;
 }
 
@@ -540,5 +560,10 @@ int piControlCalibrate(int addr, int channl, int mode, int xval, int yval)
 		return ret;
 
 	ret = ioctl(PiControlHandle_g, KB_AIO_CALIBRATE, &cali);
+	if (ret < 0) {
+		fprintf(stderr, "Failed to calibrate: %s\n", strerror(errno));
+		return -1;
+	}
+
 	return ret;
 }
