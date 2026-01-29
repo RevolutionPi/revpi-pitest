@@ -18,13 +18,15 @@ target_link_libraries(${TARGET} PRIVATE Threads::Threads)
 
 install(TARGETS ${TARGET} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-# install the symbolic link by first creating it in the binary directory and
-# then moving it to the install directory.
-# this needs to be done this way because the alternative way of doing
-# `install(CODE...` doesn't respect the installation prefix.
-add_custom_target(piControlReset ALL
-	BYPRODUCTS piControlReset
-	COMMAND ln -fs ${TARGET} ${CMAKE_CURRENT_BINARY_DIR}/piControlReset)
-add_dependencies(piControlReset ${TARGET})
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/piControlReset
-	DESTINATION ${CMAKE_INSTALL_BINDIR})
+set(LINK_NAME ${CMAKE_CURRENT_BINARY_DIR}/piControlReset)
+
+add_custom_command(
+    OUTPUT ${LINK_NAME}
+    COMMAND ${CMAKE_COMMAND} -E create_symlink ${TARGET} piControlReset
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ${TARGET}
+)
+
+add_custom_target(generate_piControlReset ALL DEPENDS ${LINK_NAME})
+
+install(FILES ${LINK_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
