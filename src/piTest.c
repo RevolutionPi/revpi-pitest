@@ -915,7 +915,7 @@ int main(int argc, char *argv[])
 		rc = piControlReset();
 		if (rc)
 			fprintf(stderr, "Failed to reset driver\n");
-		return 1;
+		return rc;
 	}
 
 	if (argc == 1) {
