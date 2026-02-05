@@ -1,3 +1,14 @@
+pitest (2.1.1-1+deb13+1) trixie; urgency=medium
+
+  [ Erik Sallmann ]
+  * build: fix symlink creation with ninja
+
+  [ Thomas Böhler ]
+  * fix: use proper return code for piControlReset
+  * chore: release v2.1.1
+
+ -- Thomas Böhler <t.boehler@kunbus.com>  Thu, 05 Feb 2026 10:09:52 +0100
+
 pitest (2.1.0-1+deb13+1) trixie; urgency=medium
 
   * Initial release for trixie
