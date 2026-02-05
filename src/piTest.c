@@ -28,7 +28,7 @@
 #include "piControl.h"
 #include "common_define.h"
 
-#define PROGRAM_VERSION		"2.1.0"
+#define PROGRAM_VERSION		"2.1.1"
 
 #define SEC_AS_USEC 1000000
 #define NUM_SPINS_PER_SECOND 16
@@ -915,7 +915,7 @@ int main(int argc, char *argv[])
 		rc = piControlReset();
 		if (rc)
 			fprintf(stderr, "Failed to reset driver\n");
-		return 1;
+		return rc;
 	}
 
 	if (argc == 1) {
