@@ -28,7 +28,7 @@
 #include "piControl.h"
 #include "common_define.h"
 
-#define PROGRAM_VERSION		"1.9.0"
+#define PROGRAM_VERSION		"1.9.1"
 
 #define SEC_AS_USEC 1000000
 #define NUM_SPINS_PER_SECOND 16
@@ -1076,7 +1076,7 @@ int main(int argc, char *argv[])
 		case 'w':
 			rc = sscanf(optarg, "%d,%d,%u", &offset, &length, &val);
 			if (rc == 3) {
-				writeData(offset, length, value);
+				writeData(offset, length, val);
 				return 0;
 			}
 			pszTok = strtok(optarg, ",");
@@ -1101,7 +1101,7 @@ int main(int argc, char *argv[])
 				printf("Try '-s offset,bit,value' (without spaces)\n");
 				return 0;
 			}
-			setBit(offset, bit, value);
+			setBit(offset, bit, val);
 			break;
 
 		case 'R':	// reset counter
