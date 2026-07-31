@@ -11,8 +11,17 @@ include:
     file: "/reuse-lint.yml"
   - project: "revolutionpi/infrastructure/ci-templates"
     file: "/check-commit/lint-commit.yml"
+  - project: revolutionpi/infrastructure/ci-templates
+    file: coverity-submit.yml
   - local: debian/gitlab-ci.yml
     rules:
       - if: $CI_COMMIT_BRANCH =~ /^(raspios|debian)\/.*/
         exists:
           - debian/gitlab-ci.yml
+
+coverity-submit:
+  before_script:
+    - apt update
+    - apt-get build-dep -y pitest
+    - cmake -Bbuild .
+    - export BUILD_CMD="cmake --build build"
