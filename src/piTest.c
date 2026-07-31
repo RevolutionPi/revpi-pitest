@@ -719,7 +719,6 @@ static int handleFirmwareUpdate(int module_address, int force_update,
 	ssize_t read = 0;
 	char *buf;
 	size_t buf_len = 0;
-	char response = 'X';
 	pthread_t spinner_thread_id;
 
 	if (module_address < 0) {
