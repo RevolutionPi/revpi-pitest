@@ -281,6 +281,8 @@ int readData(uint16_t offset, uint16_t length, bool cyclic, char format, bool qu
 			sleep(1);
 	} while (cyclic);
 
+	free(pValues);
+
 	return 0;
 }
 
