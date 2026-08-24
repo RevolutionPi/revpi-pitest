@@ -13,10 +13,15 @@ include:
     file: "/check-commit/lint-commit.yml"
   - project: revolutionpi/infrastructure/ci-templates
     file: coverity-submit.yml
+  - project: revolutionpi/infrastructure/ci-templates
+    file: create-pristine-tar.yml
   - local: debian/gitlab-ci.yml
     rules:
       - exists:
           - debian/gitlab-ci.yml
+
+variables:
+  SRCPKG_NAME: pitest
 
 coverity-submit:
   before_script:
