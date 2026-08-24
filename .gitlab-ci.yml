@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 KUNBUS GmbH
+# SPDX-FileCopyrightText: 2023-2026 KUNBUS GmbH
 #
 # SPDX-License-Identifier: MIT
 
@@ -15,8 +15,7 @@ include:
     file: coverity-submit.yml
   - local: debian/gitlab-ci.yml
     rules:
-      - if: $CI_COMMIT_BRANCH =~ /^(raspios|debian)\/.*/
-        exists:
+      - exists:
           - debian/gitlab-ci.yml
 
 coverity-submit:
