@@ -11,7 +11,9 @@ set(SOURCES
 add_executable(${TARGET} ${SOURCES})
 target_include_directories(
 	${TARGET}
-	PRIVATE ${CMAKE_BINARY_DIR}/include ../include ../lib/piControl/src
+	PRIVATE ${CMAKE_BINARY_DIR}/include
+		${CMAKE_SOURCE_DIR}/include
+		${CMAKE_SOURCE_DIR}/lib/piControl/src
 )
 
 # link pthread
