@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2025 KUNBUS GmbH
+# SPDX-FileCopyrightText: 2023-2026 KUNBUS GmbH
 #
 # SPDX-License-Identifier: MIT
 
@@ -9,7 +9,10 @@ set(SOURCES
 )
 
 add_executable(${TARGET} ${SOURCES})
-target_include_directories(${TARGET} PRIVATE ../include ../lib/piControl/src)
+target_include_directories(
+	${TARGET}
+	PRIVATE ${CMAKE_BINARY_DIR}/include ../include ../lib/piControl/src
+)
 
 # link pthread
 set(THREADS_PREFER_PTHREAD_FLAG ON)

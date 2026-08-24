@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2016-2025 KUNBUS GmbH
+// SPDX-FileCopyrightText: 2016-2026 KUNBUS GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -27,8 +27,7 @@
 #include "piControlIf.h"
 #include "piControl.h"
 #include "common_define.h"
-
-#define PROGRAM_VERSION		"2.1.1"
+#include "version.h"
 
 #define SEC_AS_USEC 1000000
 #define NUM_SPINS_PER_SECOND 16
