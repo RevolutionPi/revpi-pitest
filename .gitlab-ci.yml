@@ -27,5 +27,5 @@ coverity-submit:
   before_script:
     - apt update
     - apt-get build-dep -y pitest
-    - cmake -Bbuild .
-    - export BUILD_CMD="cmake --build build"
+    - meson setup build
+    - export BUILD_CMD="meson compile -C build"
