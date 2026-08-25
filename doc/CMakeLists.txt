@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023-2025 KUNBUS GmbH
+# SPDX-FileCopyrightText: 2023-2026 KUNBUS GmbH
 #
 # SPDX-License-Identifier: MIT
 
@@ -13,5 +13,3 @@ add_custom_target(
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/piTest.1
 	DESTINATION ${CMAKE_INSTALL_MANDIR}/man1/
 )
-
-install(FILES ../lib/piControl/src/picontrol_ioctl.4 DESTINATION ${CMAKE_INSTALL_MANDIR}/man4)
