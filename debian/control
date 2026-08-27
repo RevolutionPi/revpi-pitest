@@ -9,6 +9,7 @@ Vcs-Git: https://gitlab.com/revolutionpi/revpi-pitest.git -b debian/trixie
 Build-Depends:
   debhelper-compat (= 13),
   meson,
+  pkgconf,
   scdoc,
 Standards-Version: 4.7.2
 
