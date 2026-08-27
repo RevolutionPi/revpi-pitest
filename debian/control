@@ -9,6 +9,7 @@ Vcs-Git: https://gitlab.com/revolutionpi/revpi-pitest.git -b debian/bookworm
 Build-Depends:
   debhelper-compat (= 13),
   meson,
+  pkgconf,
   scdoc,
 Standards-Version: 4.6.2
 
