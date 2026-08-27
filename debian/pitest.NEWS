@@ -1,3 +1,45 @@
+pitest (2.2.1-1+deb12+1) bookworm; urgency=medium
+
+  pitest switches from major version 1 to major version 2 for bookworm
+  (1.9.1 -> 2.2.1).
+
+  Increasing the major version introduces breaking changes. The following
+  breaking changes are introduced with this update:
+
+  - The "-f" flag for the "piTest" command *must* be preceded with the
+    "--module" flag to specify which extension module should be updated. The
+    module address "0" is no longer a valid address.
+    Calling "piTest" with only the "-f" flag to update any extension module is
+    not possible any more.
+  - The exit status for the "piTest" command is set properly when the command
+    terminates. This means that an error makes "piTest" exit with an exit
+    status that isn't "0" to indicate that an error occurred. Checking for the
+    exit status is the preferred way to detect whether "piTest" encountered an
+    error.
+    Please check for any uses of "piTest" in scripts that evaluate the exit
+    status when calling "piTest", and for any changes in how these scripts
+    might behave due to this change.
+
+  Introducing these breaking changes is necessary to also introduce the
+  following, very important features and quality of life improvements
+  surrounding the firmware update of extension modules:
+
+  - Allow rescuing an extension module from a failed firmware update with the
+    "--rescue" flag.
+  - More descriptive error messages are printed on standard error when "piTest"
+    encounters an error.
+
+  We believe introducing these breaking changes for the mentioned addition of
+  better firmware update as well as being able rescue extension modules for
+  which a firmware update failed is a worth trade off.
+
+  More information on how to use "piTest" can be found in the "piTest(1)"
+  manual page (viewable from a terminal with the command "man 1 piTest"), and
+  about firmware updates in the official Revolution Pi documentation:
+  https://revolutionpi.com/en/docs/firmware-updates
+
+ -- Thomas Böhler <t.boehler@kunbus.com>  Thu, 01 Sep 2026 14:22:18 +0200
+
 pitest (1.8.1-1+deb12+1) bookworm; urgency=medium
 
   Updated picontrol to version 2.3.6.
