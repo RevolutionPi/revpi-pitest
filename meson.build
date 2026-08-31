@@ -5,7 +5,7 @@
 project(
   'piTest',
   'c',
-  version: '2.2.0',
+  version: '2.2.1',
 )
 
 bindir = get_option('bindir')
