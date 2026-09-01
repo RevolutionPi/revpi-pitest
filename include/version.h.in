@@ -1,0 +1,10 @@
+// SPDX-FileCopyrightText: 2026 KUNBUS GmbH
+//
+// SPDX-License-Identifier: MIT
+
+#ifndef _PITEST_VERSION_H_
+#define _PITEST_VERSION_H_
+
+#define PROGRAM_VERSION "@PROJECT_VERSION@"
+
+#endif /* _PITEST_VERSION_H_ */

@@ -475,8 +475,24 @@ int piControlUpdateFirmware(uint32_t addr_p, bool force_update, int hw_revision)
 
 	ret = ioctl(PiControlHandle_g, PICONTROL_UPLOAD_FIRMWARE, &fwu);
 	if (ret < 0) {
+		int err = errno;
+
 		fprintf(stderr, "Failed to update firmware of module with address %"
-			PRIu32 ": %s\n", addr_p, strerror(errno));
+			PRIu32 ": %s\n", addr_p, strerror(err));
+
+		/* a module stuck in firmware update mode is not detected */
+		if (err == ENODEV && hw_revision < 0) {
+			SDeviceInfo dev;
+
+			memset(&dev, 0, sizeof(dev));
+			dev.i8uAddress = addr_p;
+			if (ioctl(PiControlHandle_g, KB_GET_DEVICE_INFO, &dev) >= 0 &&
+			    (dev.i16uModuleType & PICONTROL_NOT_CONNECTED)) {
+				fprintf(stderr, "The module might be stuck in firmware update mode, "
+					"retry with: piTest --module %" PRIu32 " --rescue %u -f\n",
+					addr_p, dev.i16uHW_Revision);
+			}
+		}
 		return -1;
 	} else if (ret == 0) {
 		printf("Firmware for module with address %" PRIu32

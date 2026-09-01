@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2016-2025 KUNBUS GmbH
+// SPDX-FileCopyrightText: 2016-2026 KUNBUS GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -27,8 +27,7 @@
 #include "piControlIf.h"
 #include "piControl.h"
 #include "common_define.h"
-
-#define PROGRAM_VERSION		"2.1.1"
+#include "version.h"
 
 #define SEC_AS_USEC 1000000
 #define NUM_SPINS_PER_SECOND 16
@@ -280,6 +279,8 @@ int readData(uint16_t offset, uint16_t length, bool cyclic, char format, bool qu
 		if (cyclic)
 			sleep(1);
 	} while (cyclic);
+
+	free(pValues);
 
 	return 0;
 }
@@ -719,7 +720,6 @@ static int handleFirmwareUpdate(int module_address, int force_update,
 	ssize_t read = 0;
 	char *buf;
 	size_t buf_len = 0;
-	char response = 'X';
 	pthread_t spinner_thread_id;
 
 	if (module_address < 0) {
@@ -846,9 +846,8 @@ void printHelp(char *programname)
 	printf("                 -l: Wait for reset of piControl process.\n");
 	printf("\n");
 	printf("                 -f: Update firmware. (see tutorials on website for more info)\n");
-	printf("                     The option \"--module <addr>\" can be given before this one to specify the address of the module to update.\n");
-	printf("                     If the \"--module <addr>\" is not given before it a module to update will be selected automatically.\n");
-	printf("                     The option \"--force \" can be given before this one to ignore the firmware version check.\n");
+	printf("                     The option \"--module <addr>\" must be given before the \"-f\" flag to specify the address of the module to update.\n");
+	printf("                     The option \"--force \" can be given before the \"-f\" flag to ignore the firmware version check.\n");
 	printf("\n");
 	printf("    --module <addr>: <addr> specifies the address of the module to use for another option.\n");
 	printf("                     This options can be used with the \"-f\" flag to specify a specific module to update.\n");

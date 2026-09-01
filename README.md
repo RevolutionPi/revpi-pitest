@@ -45,9 +45,8 @@ git submodule update
 These are the instructions to build `piTest`:
 
 ```sh
-mkdir build && cd build
-cmake ..
-cmake --build .
+meson setup builddir
+meson compile -C builddir
 ```
 
 ## Documentation
