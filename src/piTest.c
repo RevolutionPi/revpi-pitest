@@ -846,8 +846,8 @@ void printHelp(char *programname)
 	printf("                 -l: Wait for reset of piControl process.\n");
 	printf("\n");
 	printf("                 -f: Update firmware. (see tutorials on website for more info)\n");
-	printf("                     The option \"--module <addr>\" must be given before this one to specify the address of the module to update.\n");
-	printf("                     The option \"--force \" can be given before this one to ignore the firmware version check.\n");
+	printf("                     The option \"--module <addr>\" must be given before the \"-f\" flag to specify the address of the module to update.\n");
+	printf("                     The option \"--force \" can be given before the \"-f\" flag to ignore the firmware version check.\n");
 	printf("\n");
 	printf("    --module <addr>: <addr> specifies the address of the module to use for another option.\n");
 	printf("                     This options can be used with the \"-f\" flag to specify a specific module to update.\n");
