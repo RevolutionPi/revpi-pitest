@@ -16,7 +16,7 @@ piTest - interact with in-kernel piControl process
 *piTest* *-s* _o_,_b_,(*0*|*1*)++
 *piTest* *-R* _a_,_b_++
 *piTest* *-C* _address_++
-*piTest* [*--module* _address_] [*--force*] *-f*++
+*piTest* *--module* _address_ [*--force*] *-f*++
 *piTest* *-l*++
 *piTest* *-S*++
 *piTest* *-x*
@@ -90,8 +90,8 @@ Multiple of these options may be given to execute a sequence of actions:
 	updated if the update is newer than the version running on the module. This
 	behaviour can be changed with the *--force* flag.
 
-	The option *--module* can be used to specify a specific module to update
-	instead of automatically selecting one.
+	The option *--module* must be used to specify the address of the module that
+	should be updated.
 
 *--module* _address_
 	Specify the module that the following flag should use with the _address_.
@@ -113,6 +113,9 @@ Multiple of these options may be given to execute a sequence of actions:
 
 *-l*
 	Listen for events such as a piControl reset initiated by another process.
+	With this flag the exit status of piTest no longer states whether the
+	command failed or not but corresponds to an event that was caught. The exit
+	codes are documents in *EXIT STATUS*.
 
 *-S*
 	Stop cyclic synchronization of the process image with attached I/O and
@@ -126,6 +129,14 @@ Multiple of these options may be given to execute a sequence of actions:
 
 *-h*
 	Show summary of options.
+
+# EXIT STATUS
+
+piTest exits with an exit status 1 if an error occurred.
+
+If the *-l* flag is given exit codes have the following meaning:
+
+- 1: Reset
 
 # EXAMPLES
 

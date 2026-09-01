@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2016-2023 KUNBUS GmbH
+// SPDX-FileCopyrightText: 2016-2026 KUNBUS GmbH
 //
 // SPDX-License-Identifier: MIT
 
@@ -27,8 +27,7 @@
 #include "piControlIf.h"
 #include "piControl.h"
 #include "common_define.h"
-
-#define PROGRAM_VERSION		"1.9.1"
+#include "version.h"
 
 #define SEC_AS_USEC 1000000
 #define NUM_SPINS_PER_SECOND 16
@@ -44,76 +43,6 @@
 # define FORCE_LONG_ARG_INDEX  1
 # define ASSUME_YES_LONG_ARG_INDEX 2
 # define RESCUE_LONG_ARG_INDEX 3
-
-/***********************************************************************************/
-/*!
- * @brief Get message text for read error
- *
- * Get the message text for an error on read from control process.
- *
- * @param[in]   Error number.
- *
- * @return Pointer to the error message
- *
- ************************************************************************************/
-char *getReadError(int error)
-{
-	static char *ReadError[] = {
-		"Cannot connect to control process",
-		"Offset seek error",
-		"Cannot read from control process",
-		"Unknown error"
-	};
-	switch (error) {
-	case -1:
-		return ReadError[0];
-		break;
-	case -2:
-		return ReadError[1];
-		break;
-	case -3:
-		return ReadError[2];
-		break;
-	default:
-		return ReadError[3];
-		break;
-	}
-}
-
-/***********************************************************************************/
-/*!
- * @brief Get message text for write error
- *
- * Get the message text for an error on write to control process.
- *
- * @param[in]   Error number.
- *
- * @return Pointer to the error message
- *
- ************************************************************************************/
-char *getWriteError(int error)
-{
-	static char *WriteError[] = {
-		"Cannot connect to control process",
-		"Offset seek error",
-		"Cannot write to control process",
-		"Unknown error"
-	};
-	switch (error) {
-	case -1:
-		return WriteError[0];
-		break;
-	case -2:
-		return WriteError[1];
-		break;
-	case -3:
-		return WriteError[2];
-		break;
-	default:
-		return WriteError[3];
-		break;
-	}
-}
 
 /***********************************************************************************/
 /*!
@@ -228,7 +157,7 @@ char *getModuleName(uint16_t moduletype)
  * Show all devices connected to control process and print their info data
  *
  ************************************************************************************/
-void showDeviceList(void)
+int showDeviceList(void)
 {
 	SDeviceInfo asDevList[REV_PI_DEV_CNT_MAX];
 	SDeviceInfo *devinfo;
@@ -239,8 +168,7 @@ void showDeviceList(void)
 	// Get device info
 	devcount = piControlGetDeviceInfoList(asDevList);
 	if (devcount < 0) {
-		printf("Cannot retrieve device list: %s\n", strerror(-devcount));
-		return;
+		return devcount;
 	}
 
 	printf("Found %d devices:\n\n", devcount);
@@ -279,6 +207,8 @@ void showDeviceList(void)
 	}
 
 	piShowLastMessage();
+
+	return devcount;
 }
 
 /***********************************************************************************/
@@ -291,7 +221,7 @@ void showDeviceList(void)
  * @param[in]   Length
  *
  ************************************************************************************/
-void readData(uint16_t offset, uint16_t length, bool cyclic, char format, bool quiet)
+int readData(uint16_t offset, uint16_t length, bool cyclic, char format, bool quiet)
 {
 	int rc;
 	uint8_t *pValues;
@@ -305,15 +235,16 @@ void readData(uint16_t offset, uint16_t length, bool cyclic, char format, bool q
 	// Get memory for the values
 	pValues = malloc(length);
 	if (pValues == NULL) {
-		printf("Not enough memory\n");
-		return;
+		fprintf(stderr, "Not enough memory\n");
+		return -ENOMEM;
 	}
 
 	do {
 		rc = piControlRead(offset, length, pValues);
 		if (rc < 0) {
 			if (!quiet) {
-				printf("read error %s\n", getReadError(rc));
+				if (!cyclic)
+					return rc;
 			}
 		} else {
 			for (val = 0; val < length; val++) {
@@ -348,6 +279,10 @@ void readData(uint16_t offset, uint16_t length, bool cyclic, char format, bool q
 		if (cyclic)
 			sleep(1);
 	} while (cyclic);
+
+	free(pValues);
+
+	return 0;
 }
 
 /***********************************************************************************/
@@ -359,7 +294,7 @@ void readData(uint16_t offset, uint16_t length, bool cyclic, char format, bool q
  * @param[in]   Variable name
  *
  ************************************************************************************/
-void readVariableValue(char *pszVariableName, bool cyclic, char format, bool quiet)
+int readVariableValue(char *pszVariableName, bool cyclic, char format, bool quiet)
 {
 	int rc;
 	SPIVariable sPiVariable;
@@ -371,8 +306,8 @@ void readVariableValue(char *pszVariableName, bool cyclic, char format, bool qui
 	snprintf(sPiVariable.strVarName, sizeof(sPiVariable.strVarName), "%s", pszVariableName);
 	rc = piControlGetVariableInfo(&sPiVariable);
 	if (rc < 0) {
-		printf("Cannot find variable '%s'\n", pszVariableName);
-		return;
+		fprintf(stderr, "Failed to find variable '%s'\n", pszVariableName);
+		return rc;
 	}
 	if (sPiVariable.i16uLength == 1) {
 		sPIValue.i16uAddress = sPiVariable.i16uAddress;
@@ -380,9 +315,11 @@ void readVariableValue(char *pszVariableName, bool cyclic, char format, bool qui
 
 		do {
 			rc = piControlGetBitValue(&sPIValue);
-			if (rc < 0)
-				printf("Get bit error\n");
-			else {
+			if (rc < 0) {
+				fprintf(stderr, "Failed to get bit value\n");
+				if (!cyclic)
+					return rc;
+			} else {
 				if (!quiet)
 					printf("Bit value: %d\n", sPIValue.i8uValue);
 				else
@@ -394,9 +331,11 @@ void readVariableValue(char *pszVariableName, bool cyclic, char format, bool qui
 	} else if (sPiVariable.i16uLength == 8) {
 		do {
 			rc = piControlRead(sPiVariable.i16uAddress, 1, (uint8_t *) & i8uValue);
-			if (rc < 0)
-				printf("Read error\n");
-			else {
+			if (rc < 0) {
+				fprintf(stderr, "Failed to read variable\n");
+				if (!cyclic)
+					return rc;
+			} else {
 				if (format == 'h') {
 					if (!quiet)
 						printf("1 Byte-Value of %s: %02x hex (=%d dez)\n", pszVariableName,
@@ -430,9 +369,11 @@ void readVariableValue(char *pszVariableName, bool cyclic, char format, bool qui
 	} else if (sPiVariable.i16uLength == 16) {
 		do {
 			rc = piControlRead(sPiVariable.i16uAddress, 2, (uint8_t *) & i16uValue);
-			if (rc < 0)
-				printf("Read error\n");
-			else {
+			if (rc < 0) {
+				fprintf(stderr, "Failed to read variable\n");
+				if (!cyclic)
+					return rc;
+			} else {
 				if (format == 'h') {
 					if (!quiet)
 						printf("2 Byte-Value of %s: %04x hex (=%d dez)\n", pszVariableName,
@@ -476,9 +417,11 @@ void readVariableValue(char *pszVariableName, bool cyclic, char format, bool qui
 	} else if (sPiVariable.i16uLength == 32) {
 		do {
 			rc = piControlRead(sPiVariable.i16uAddress, 4, (uint8_t *) & i32uValue);
-			if (rc < 0)
-				printf("Read error\n");
-			else {
+			if (rc < 0) {
+				fprintf(stderr, "Failed to read variable\n");
+				if (!cyclic)
+					return rc;
+			} else {
 				if (format == 'h') {
 					if (!quiet)
 						printf("4 Byte-Value of %s: %08x hex (=%d dez)\n", pszVariableName,
@@ -539,8 +482,14 @@ void readVariableValue(char *pszVariableName, bool cyclic, char format, bool qui
 			if (cyclic)
 				sleep(1);
 		} while (cyclic);
-	} else
-		printf("Could not read variable %s. Internal Error\n", pszVariableName);
+	} else {
+		fprintf(stderr,
+			"Got invalid length %u for read variable %s\n",
+			sPiVariable.i16uLength, pszVariableName);
+		return -1;
+	}
+
+	return 0;
 }
 
 /***********************************************************************************/
@@ -554,20 +503,20 @@ void readVariableValue(char *pszVariableName, bool cyclic, char format, bool qui
  * @param[in]   Value to write
  *
  ************************************************************************************/
-void writeData(int offset, int length, unsigned long i32uValue)
+int writeData(int offset, int length, unsigned int i32uValue)
 {
 	int rc;
 
 	if (length != 1 && length != 2 && length != 4) {
-		printf("Length must be one of 1|2|4\n");
-		return;
+		fprintf(stderr, "Length must be one of 1|2|4\n");
+		return -EINVAL;
 	}
 	rc = piControlWrite(offset, length, (uint8_t *) & i32uValue);
-	if (rc < 0) {
-		printf("write error %s\n", getWriteError(rc));
-	} else {
-		printf("Write value %lx hex (=%ld dez) to offset %d.\n", i32uValue, i32uValue, offset);
-	}
+	if (rc < 0)
+		return rc;
+
+	printf("Write value %x hex (=%d dez) to offset %d.\n", i32uValue, i32uValue, offset);
+	return 0;
 }
 
 /***********************************************************************************/
@@ -580,7 +529,7 @@ void writeData(int offset, int length, unsigned long i32uValue)
  * @param[in]   Value to write
  *
  ************************************************************************************/
-void writeVariableValue(char *pszVariableName, uint32_t i32uValue)
+int writeVariableValue(char *pszVariableName, uint32_t i32uValue)
 {
 	int rc;
 	SPIVariable sPiVariable;
@@ -591,8 +540,8 @@ void writeVariableValue(char *pszVariableName, uint32_t i32uValue)
 	snprintf(sPiVariable.strVarName, sizeof(sPiVariable.strVarName), "%s", pszVariableName);
 	rc = piControlGetVariableInfo(&sPiVariable);
 	if (rc < 0) {
-		printf("Cannot find variable '%s'\n", pszVariableName);
-		return;
+		fprintf(stderr, "Cannot find variable '%s'\n", pszVariableName);
+		return rc;
 	}
 
 	if (sPiVariable.i16uLength == 1) {
@@ -600,35 +549,41 @@ void writeVariableValue(char *pszVariableName, uint32_t i32uValue)
 		sPIValue.i8uBit = sPiVariable.i8uBit;
 		sPIValue.i8uValue = i32uValue;
 		rc = piControlSetBitValue(&sPIValue);
-		if (rc < 0)
-			printf("Set bit error %s\n", getWriteError(rc));
-		else
+		if (rc < 0) {
+			fprintf(stderr, "Error setting bit value\n");
+			return rc;
+		} else
 			printf("Set bit %d on byte at offset %d. Value %d\n", sPIValue.i8uBit, sPIValue.i16uAddress,
 			       sPIValue.i8uValue);
 	} else if (sPiVariable.i16uLength == 8) {
 		i8uValue = i32uValue;
 		rc = piControlWrite(sPiVariable.i16uAddress, 1, (uint8_t *) & i8uValue);
-		if (rc < 0)
-			printf("Write error %s\n", getWriteError(rc));
-		else
+		if (rc < 0) {
+			fprintf(stderr, "Error writing variable address\n");
+			return rc;
+		} else
 			printf("Write value %d dez (=%02x hex) to offset %d.\n", i8uValue, i8uValue,
 			       sPiVariable.i16uAddress);
 	} else if (sPiVariable.i16uLength == 16) {
 		i16uValue = i32uValue;
 		rc = piControlWrite(sPiVariable.i16uAddress, 2, (uint8_t *) & i16uValue);
-		if (rc < 0)
-			printf("Write error %s\n", getWriteError(rc));
-		else
+		if (rc < 0) {
+			fprintf(stderr, "Error writing variable address\n");
+			return rc;
+		} else
 			printf("Write value %d dez (=%04x hex) to offset %d.\n", i16uValue, i16uValue,
 			       sPiVariable.i16uAddress);
 	} else if (sPiVariable.i16uLength == 32) {
 		rc = piControlWrite(sPiVariable.i16uAddress, 4, (uint8_t *) & i32uValue);
-		if (rc < 0)
-			printf("Write error %s\n", getWriteError(rc));
-		else
+		if (rc < 0) {
+			fprintf(stderr, "Error writing variable address\n");
+			return rc;
+		} else
 			printf("Write value %d dez (=%08x hex) to offset %d.\n", i32uValue, i32uValue,
 			       sPiVariable.i16uAddress);
 	}
+
+	return 0;
 }
 
 /***********************************************************************************/
@@ -642,20 +597,20 @@ void writeVariableValue(char *pszVariableName, uint32_t i32uValue)
  * @param[in]   Value to write (0/1)
  *
  ************************************************************************************/
-void setBit(int offset, int bit, int value)
+int setBit(int offset, int bit, int value)
 {
 	int rc;
 	SPIValue sPIValue;
 
 	// Check bit
 	if (bit < 0 || bit > 7) {
-		printf("Wrong bit number. Try 0 - 7\n");
-		return;
+		fprintf(stderr, "Wrong bit number. Try 0 - 7\n");
+		return -EINVAL;
 	}
 	// Check value
 	if (value != 0 && value != 1) {
-		printf("Wrong value. Try 0/1\n");
-		return;
+		fprintf(stderr, "Wrong value. Try 0/1\n");
+		return -EINVAL;
 	}
 
 	sPIValue.i16uAddress = offset;
@@ -663,11 +618,9 @@ void setBit(int offset, int bit, int value)
 	sPIValue.i8uValue = value;
 	// Set bit
 	rc = piControlSetBitValue(&sPIValue);
-	if (rc < 0) {
-		printf("Set bit error %s\n", getWriteError(rc));
-	} else {
-		printf("Set bit %d on byte at offset %d. Value %d\n", bit, offset, value);
-	}
+	if (rc < 0)
+		return rc;
+	return 0;
 }
 
 /***********************************************************************************/
@@ -680,15 +633,15 @@ void setBit(int offset, int bit, int value)
  * @param[in]   Bit number (0 - 7)
  *
  ************************************************************************************/
-void getBit(int offset, int bit, bool quiet)
+int getBit(int offset, int bit, bool quiet)
 {
 	int rc;
 	SPIValue sPIValue;
 
 	// Check bit
 	if (bit < 0 || bit > 7) {
-		printf("Wrong bit number. Try 0 - 7\n");
-		return;
+		fprintf(stderr, "Wrong bit number. Try 0 - 7\n");
+		return -EINVAL;
 	}
 
 	sPIValue.i16uAddress = offset;
@@ -696,12 +649,15 @@ void getBit(int offset, int bit, bool quiet)
 	// Get bit
 	rc = piControlGetBitValue(&sPIValue);
 	if (rc < 0) {
-		printf("Get bit error\n");
+		fprintf(stderr, "Failed to get bit value\n");
+		return rc;
 	} else if (quiet) {
 		printf("%d\n", sPIValue.i8uValue);
 	} else {
 		printf("Get bit %d at offset %d. Value %d\n", bit, offset, sPIValue.i8uValue);
 	}
+
+	return 0;
 }
 
 /***********************************************************************************/
@@ -711,7 +667,7 @@ void getBit(int offset, int bit, bool quiet)
  * @param[in]   Variable name
  *
  ************************************************************************************/
-void showVariableInfo(char *pszVariableName)
+int showVariableInfo(char *pszVariableName)
 {
 	int rc;
 	SPIVariable sPiVariable;
@@ -719,13 +675,16 @@ void showVariableInfo(char *pszVariableName)
 	snprintf(sPiVariable.strVarName, sizeof(sPiVariable.strVarName), "%s", pszVariableName);
 	rc = piControlGetVariableInfo(&sPiVariable);
 	if (rc < 0) {
-		printf("Cannot read variable info\n");
+		fprintf(stderr, "Failed to read variable info\n");
+		return rc;
 	} else {
 		printf("variable name: %s\n", sPiVariable.strVarName);
 		printf("       offset: %d\n", sPiVariable.i16uAddress);
 		printf("       length: %d\n", sPiVariable.i16uLength);
 		printf("          bit: %d\n", sPiVariable.i8uBit);
 	}
+
+	return 0;
 }
 
 static void printVersion(char *programname)
@@ -761,8 +720,13 @@ static int handleFirmwareUpdate(int module_address, int force_update,
 	ssize_t read = 0;
 	char *buf;
 	size_t buf_len = 0;
-	char response = 'X';
 	pthread_t spinner_thread_id;
+
+	if (module_address < 0) {
+		fprintf(stderr,
+			"A module address must be given for an update and it must be placed before the -f parameter\n");
+		return -EINVAL;
+	}
 
 	if (!assume_yes) {
 		printf("Are you sure you want to update the firmware of a RevPi module? (y/N) ");
@@ -882,9 +846,8 @@ void printHelp(char *programname)
 	printf("                 -l: Wait for reset of piControl process.\n");
 	printf("\n");
 	printf("                 -f: Update firmware. (see tutorials on website for more info)\n");
-	printf("                     The option \"--module <addr>\" can be given before this one to specify the address of the module to update.\n");
-	printf("                     If the \"--module <addr>\" is not given before it a module to update will be selected automatically.\n");
-	printf("                     The option \"--force \" can be given before this one to ignore the firmware version check.\n");
+	printf("                     The option \"--module <addr>\" must be given before the \"-f\" flag to specify the address of the module to update.\n");
+	printf("                     The option \"--force \" can be given before the \"-f\" flag to ignore the firmware version check.\n");
 	printf("\n");
 	printf("    --module <addr>: <addr> specifies the address of the module to use for another option.\n");
 	printf("                     This options can be used with the \"-f\" flag to specify a specific module to update.\n");
@@ -933,7 +896,7 @@ int main(int argc, char *argv[])
 	// Used for the `-f` option. If `--module <arg>` is not given *before* the
 	// `-f` option the default value of `0` is used, which will automatically
 	// choose which module to update.
-	unsigned int module_address = 0;
+	int module_address = -1;
 	int module_hw_revision = -1;
 	int assume_yes = 0;
 	char szVariableName[256];
@@ -949,9 +912,8 @@ int main(int argc, char *argv[])
 
 	if (!strcmp(progname, "piControlReset")) {
 		rc = piControlReset();
-		if (rc) {
-			printf("Cannot reset: %s\n", strerror(-rc));
-		}
+		if (rc)
+			fprintf(stderr, "Failed to reset driver\n");
 		return rc;
 	}
 
@@ -983,7 +945,12 @@ int main(int argc, char *argv[])
 					if (endptr == optarg) {
 						fprintf(stderr, "Invalid argument '%s' to option '%s'\n", optarg,
 							long_options[option_index].name);
-						exit(1);
+						return 1;
+					}
+					if (module_address < 0) {
+						fprintf(stderr,
+							"The address of a module must be a positive number\n");
+						return 1;
 					}
 					break;
 				}
@@ -1015,20 +982,26 @@ int main(int argc, char *argv[])
 
 				default:
 					fprintf(stderr, "Invalid long option index %d\n", option_index);
-					exit(1);
+					return 1;
 					break;
 			}
 			break;
 
 		case 'd':
-			showDeviceList();
+			rc = showDeviceList();
+			if (rc < 0) {
+				fprintf(stderr, "Cannot retrieve device list\n");
+				return 1;
+			}
 			break;
 
 		case 'v':
 			if (strlen(optarg) > 0) {
-				showVariableInfo(optarg);
+				if (showVariableInfo(optarg))
+					return 1;
 			} else {
-				printf("No variable name\n");
+				fprintf(stderr, "No variable name\n");
+				return 1;
 			}
 			break;
 
@@ -1048,12 +1021,20 @@ int main(int argc, char *argv[])
 			format = 'd';
 			rc = sscanf(optarg, "%d,%d,%c", &offset, &length, &format);
 			if (rc == 3) {
-				readData(offset, length, cyclic, format, quiet);
+				rc = readData(offset, length, cyclic, format, quiet);
+				if (rc < 0) {
+					fprintf(stderr, "Failed to read data\n");
+					return 1;
+				}
 				return 0;
 			}
 			rc = sscanf(optarg, "%d,%d", &offset, &length);
 			if (rc == 2) {
-				readData(offset, length, cyclic, format, quiet);
+				rc = readData(offset, length, cyclic, format, quiet);
+				if (rc < 0) {
+					fprintf(stderr, "Failed to read data\n");
+					return 1;
+				}
 				return 0;
 			}
 			rc = sscanf(optarg, "%s", szVariableName);
@@ -1065,18 +1046,27 @@ int main(int argc, char *argv[])
 						format = *pszTok;
 					}
 				}
-				readVariableValue(szVariableName, cyclic, format, quiet);
+				rc = readVariableValue(szVariableName, cyclic, format, quiet);
+				if (rc < 0) {
+					fprintf(stderr, "Failed to read variable value\n");
+					return 1;
+				}
 				return 0;
 			}
-			printf("Wrong arguments for read function\n");
-			printf("1.) Try '-r variablename'\n");
-			printf("2.) Try '-r offset,length' (without spaces)\n");
+			fprintf(stderr, "Wrong arguments for read function\n");
+			fprintf(stderr, "1.) Try '-r variablename'\n");
+			fprintf(stderr, "2.) Try '-r offset,length' (without spaces)\n");
+			return 1;
 			break;
 
 		case 'w':
 			rc = sscanf(optarg, "%d,%d,%u", &offset, &length, &val);
 			if (rc == 3) {
-				writeData(offset, length, val);
+				rc = writeData(offset, length, val);
+				if (rc < 0) {
+					fprintf(stderr, "Failed to write data\n");
+					return 1;
+				}
 				return 0;
 			}
 			pszTok = strtok(optarg, ",");
@@ -1085,23 +1075,34 @@ int main(int argc, char *argv[])
 				pszTok = strtok(NULL, ",");
 				if (pszTok != NULL) {
 					value = strtol(pszTok, NULL, 10);
-					writeVariableValue(szVariableName, value);
+					rc = writeVariableValue(szVariableName, value);
+					if (rc < 0) {
+						fprintf(stderr, "Failed to write value to variable\n");
+						return 1;
+					}
 					return 0;
 				}
 			}
-			printf("Wrong arguments for write function\n");
-			printf("1.) Try '-w variablename,value' (without spaces)\n");
-			printf("2.) Try '-w offset,length,value' (without spaces)\n");
+			fprintf(stderr, "Wrong arguments for write function\n");
+			fprintf(stderr, "1.) Try '-w variablename,value' (without spaces)\n");
+			fprintf(stderr, "2.) Try '-w offset,length,value' (without spaces)\n");
+			return 1;
 			break;
 
 		case 's':
 			rc = sscanf(optarg, "%d,%d,%u", &offset, &bit, &val);
 			if (rc != 3) {
-				printf("Wrong arguments for set bit function\n");
-				printf("Try '-s offset,bit,value' (without spaces)\n");
-				return 0;
+				fprintf(stderr, "Wrong arguments for set bit function\n");
+				fprintf(stderr, "Try '-s offset,bit,value' (without spaces)\n");
+				return 1;
 			}
-			setBit(offset, bit, val);
+			rc = setBit(offset, bit, val);
+			if (rc < 0) {
+				fprintf(stderr, "Failed to set bit\n");
+				return 1;
+			}
+			printf("Set bit %d on byte at offset %d. Value %d\n", bit, offset, val);
+			return 0;
 			break;
 
 		case 'R':	// reset counter
@@ -1109,21 +1110,31 @@ int main(int argc, char *argv[])
 			if (rc != 2) {
 				rc = sscanf(optarg, "%d,%u", &address, &val);
 				if (rc != 2) {
-					printf("Wrong arguments for counter reset function\n");
-					printf("Try '-R address,value' (without spaces)\n");
-					return 0;
+					fprintf(stderr, "Wrong arguments for counter reset function\n");
+					fprintf(stderr, "Try '-R address,value' (without spaces)\n");
+					return 1;
 				}
 			}
-			piControlResetCounter(address, val);
+			rc = piControlResetCounter(address, val);
+			if (rc < 0) {
+				fprintf(stderr, "Failed to reset counter\n");
+				return 1;
+			}
+			return 0;
 			break;
 		case 'C':	// get RO counters
 			rc = sscanf(optarg, "%d", &address);
 			if (rc != 1) {
-				printf("Wrong arguments for retrieving RO counters\n");
-				printf("Try '-C address'\n");
-				return 0;
+				fprintf(stderr, "Wrong arguments for retrieving RO counters\n");
+				fprintf(stderr, "Try '-C address'\n");
+				return 1;
 			}
-			piControlGetROCounters(address);
+			rc = piControlGetROCounters(address);
+			if (rc < 0) {
+				fprintf(stderr, "Failed to get RO counters\n");
+				return 1;
+			}
+			return 0;
 			break;
 
 		case 'c':
@@ -1135,39 +1146,49 @@ int main(int argc, char *argv[])
 				rc = sscanf(optarg, "%u,%u,%u,%u,%u",
 					&addr, &channl, &mode, &x_val, &y_val);
 				if (rc != 5) {
-					printf("Wrong arguments to calibrate\n");
-					printf("Try '-c address,channels,modes,"
+					fprintf(stderr, "Wrong arguments to calibrate\n");
+					fprintf(stderr, "Try '-c address,channels,modes,"
 						"x,y'(without spaces)\n");
-					return 0;
+					return 1;
 				}
 			}
-			piControlCalibrate(addr, channl, mode, x_val, y_val);
+			rc = piControlCalibrate(addr, channl, mode, x_val, y_val);
+			if (rc < 0) {
+				fprintf(stderr, "Failed to calibrate\n");
+				return 1;
+			}
 			printf("calibrated dev:%d,chnnls:%d,mode:%d,x:%d,y:%d\n",
 					addr, channl, mode, x_val, y_val);
+			return 0;
 		}
 			break;
 		case 'g':
 			rc = sscanf(optarg, "%d,%d", &offset, &bit);
 			if (rc != 2) {
-				printf("Wrong arguments for get bit function\n");
-				printf("Try '-g offset,bit' (without spaces)\n");
-				return 0;
+				fprintf(stderr, "Wrong arguments for get bit function\n");
+				fprintf(stderr, "Try '-g offset,bit' (without spaces)\n");
+				return 1;
 			}
-			getBit(offset, bit, quiet);
+			rc = getBit(offset, bit, quiet);
+			if (rc < 0) {
+				fprintf(stderr, "Failed to get bit value\n");
+				return 1;
+			}
+			return 0;
 			break;
 
 		case 'x':
 			rc = piControlReset();
 			if (rc) {
-				printf("Cannot reset: %s\n", strerror(-rc));
-				return rc;
+				fprintf(stderr, "Failed to reset driver\n");
+				return 1;
 			}
 			break;
 
 		case 'l':
 			rc = piControlWaitForEvent();
 			if (rc < 0) {
-				printf("WaitForEvent returned: %d (%s)\n", rc, strerror(-rc));
+				fprintf(stderr, "Failed to wait for event\n");
 				return rc;
 			} else if (rc == 1) {
 				printf("WaitForEvent returned: Reset\n");
@@ -1190,7 +1211,8 @@ int main(int argc, char *argv[])
 		case 'S':
 			rc = piControlStopIO(2);	// toggle mode of I/Os
 			if (rc < 0) {
-				printf("error in setting I/O update mode: %d\n", rc);
+				fprintf(stderr, "error in setting I/O update mode: %d\n", rc);
+				return 1;
 			} else if (rc == 0) {
 				printf("I/Os and process image are updated\n");
 			} else {
@@ -1204,5 +1226,6 @@ int main(int argc, char *argv[])
 			break;
 		}
 	}
+
 	return 0;
 }

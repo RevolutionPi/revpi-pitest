@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 KUNBUS GmbH
+# SPDX-FileCopyrightText: 2023-2026 KUNBUS GmbH
 #
 # SPDX-License-Identifier: MIT
 
@@ -11,8 +11,21 @@ include:
     file: "/reuse-lint.yml"
   - project: "revolutionpi/infrastructure/ci-templates"
     file: "/check-commit/lint-commit.yml"
+  - project: revolutionpi/infrastructure/ci-templates
+    file: coverity-submit.yml
+  - project: revolutionpi/infrastructure/ci-templates
+    file: create-pristine-tar.yml
   - local: debian/gitlab-ci.yml
     rules:
-      - if: $CI_COMMIT_BRANCH =~ /^(raspios|debian)\/.*/
-        exists:
+      - exists:
           - debian/gitlab-ci.yml
+
+variables:
+  SRCPKG_NAME: pitest
+
+coverity-submit:
+  before_script:
+    - apt update
+    - apt-get build-dep -y pitest
+    - meson setup build
+    - export BUILD_CMD="meson compile -C build"
