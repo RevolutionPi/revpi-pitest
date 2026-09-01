@@ -1,3 +1,96 @@
+pitest (2.2.1-1+deb12+1) bookworm; urgency=medium
+
+  [ Lino Sanfilippo ]
+  * feat: replace ioctl KB_UPDATE_DEVICE_FIRMWARE
+  * feat: support command line parameter for forced update
+  * doc: Add description for the force parameter
+  * chore: switch to latest piControl version
+  * build: correct cmake directories path
+  * feat: provide command line option for version info
+  * doc: Add description for the Version parameter
+  * refactor: use tabs instead of spaces in piControlIf.c
+  * refactor: in piControlIf.h use correct SPDX Header
+  * refactor: get rid of obsolete code compiled with KUNBUS_TEST defined
+  * fix: remove superfluous call of piShowLastMessage
+  * feat: add messages for firmware update
+  * refactor: use temporary variable in loop
+  * fix: do not apply mask to active devices
+  * fix: remove unused function piControlFindVariable
+  * fix: get rid of function get[Read|WriteError]
+  * fix: honour return value of function showVariableInfo
+  * chore: switch to piControl v2.4.0
+  * feat: Support firmware rescue mode
+  * fix: correct parameter of function writeData
+
+  [ Thomas Böhler ]
+  * fix: return proper error on piControlOpen
+  * fix: do error handling properly
+  * doc: document exit codes for piTest
+  * doc: rewrite man page with scdoc
+  * doc: bundle examples under separate heading
+  * doc: add proper synopsis for piTest man page
+  * doc: add reference to picontrol_ioctl man page
+  * fix: avoid empty initializer braces in long_opts
+  * doc: Update -f option for better readability
+  * doc: add optional force parameter to synopsis
+  * doc: --module option is required for fwupdate
+  * doc: reference man page in README.md
+  * doc: fix indentation of -V option in help output
+  * fix: don't fail on up to date firmware
+  * feat: show notice on successful firmware update
+  * fix: be consistent with firmware update messages
+  * doc: --module value must be greater than 0
+  * fix: improve error message on missing module flag
+  * fix: disallow firmware update of revpi
+  * build: install moved picontrol_ioctl man page
+  * chore: release version 2.0.0
+  * fix(fwupdate): require confirmation before update
+  * feat(fwupdate): add spinner
+  * feat(fwupdate): add -q for fwupdate
+  * build: link against libpthread
+  * build: use find_program for scdoc
+  * build: use current directories for simplicity
+  * build: specify piControlReset's dep to piTest
+  * build: specify piControlReset's output
+  * chore: release v2.1.0
+  * fix: use proper return code for piControlReset
+  * chore: release v2.1.1
+  * fix: remove unused response variable
+  * fix: free allocated memory of pValues
+  * build: set program version in CMakeLists.txt
+  * build: use CMAKE_SOURCE_DIR in favour of relative paths
+  * build: don't install picontrol_ioctl.4
+  * build: switch to meson
+  * chore: bump to version 2.2.0
+  * fix: add required --module to -f help text
+  * fix: reword "-f" flag help text
+  * chore: bump to v2.2.1
+  * feat!(deb): change from 1.x to master branch
+  * fix(deb): declare meson als build dep
+  * build(deb): add pkgconf as build dependency
+  * chore(deb): update copyright years
+  * chore(deb): update headquarters in copyright
+  * chore(deb): ignore NMU lintian warnings
+  * chore(deb): ignore no-manual-page for piControlReset
+  * fix(deb): don't specify "--as-needed' in rules
+  * fix(deb): name NEWS file with package name
+  * feat(deb): add NEWS entry for breaking change
+
+  [ Ramiro Gsponer ]
+  * fix: Add support for virtual devices
+  * chore: switch to piControl v2.3.5
+  * feat: Use defines for module type identifiers
+  * chore: switch to piControl v2.3.6
+
+  [ Nicolai Buchwitz ]
+  * feat: Remove redundant error messages in fw update
+  * feat: print rescue command on missing module
+
+  [ Erik Sallmann ]
+  * build: fix symlink creation with ninja
+
+ -- Thomas Böhler <t.boehler@kunbus.com>  Tue, 01 Sep 2026 14:47:08 +0200
+
 pitest (1.9.1-1+deb12+1) bookworm; urgency=medium
 
   [ Nicolai Buchwitz ]
