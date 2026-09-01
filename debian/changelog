@@ -1,3 +1,30 @@
+pitest (2.2.1-1+deb13+1) trixie; urgency=medium
+
+  [ Nicolai Buchwitz ]
+  * feat: print rescue command on missing module
+
+  [ Thomas Böhler ]
+  * fix: remove unused response variable
+  * fix: free allocated memory of pValues
+  * build: set program version in CMakeLists.txt
+  * build: use CMAKE_SOURCE_DIR in favour of relative paths
+  * build: don't install picontrol_ioctl.4
+  * build: switch to meson
+  * chore: bump to version 2.2.0
+  * fix: add required --module to -f help text
+  * fix: reword "-f" flag help text
+  * chore: bump to v2.2.1
+  * fix(deb): declare meson als build dep
+  * build(deb): add pkgconf as build dependency
+  * chore(deb): update copyright years
+  * chore(deb): update headquarters in copyright
+  * chore(deb): ignore NMU lintian warnings
+  * chore(deb): ignore no-manual-page for piControlReset
+  * fix(deb): don't specify "--as-needed' in rules
+  * fix(deb): name NEWS file with package name
+
+ -- Thomas Böhler <t.boehler@kunbus.com>  Tue, 01 Sep 2026 14:23:42 +0200
+
 pitest (2.1.1-1+deb13+1) trixie; urgency=medium
 
   [ Erik Sallmann ]
