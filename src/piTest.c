@@ -206,8 +206,6 @@ int showDeviceList(void)
 		printf("\n");
 	}
 
-	piShowLastMessage();
-
 	return devcount;
 }
 
