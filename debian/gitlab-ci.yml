@@ -7,6 +7,8 @@ include:
     file: package-deb.yml
   - project: revolutionpi/infrastructure/ci-templates
     file: package-release-debian.yml
+  - project: revolutionpi/infrastructure/ci-templates
+    file: testing/package-deb.yml
 
 build-package:
   parallel:
